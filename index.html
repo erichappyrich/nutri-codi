@@ -1425,6 +1425,18 @@ const DATA={
 [
 "eye",
 "눈 건강"
+],
+[
+"constipation",
+"변비"
+],
+[
+"liver",
+"간"
+],
+[
+"fatigue",
+"피로"
 ]
 ],
 "areaMap": {
@@ -3407,12 +3419,12 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
  sunOut:'am',sunAmt:'mid',
  exWeek:[null,null,null,null,null,null,null],exActive:-1,
  alcWeek:[null,null,null,null,null,null,null],alcActive:-1,lastEx:null,lastAlc:null,
- smokeType:'none',smokeAmt:'high',stress:1,mvHas:null,mvStar:0,mvPrice:null,showPrice:false,health:[],meds:[],preg:'',interests:[],
+ smokeType:'none',smokeAmt:'high',smokeCigs:null,stress:1,mvHas:null,mvStar:0,mvPrice:null,showPrice:false,health:[],meds:[],preg:'',interests:[],
  name:'',mode:'detail',simple:{},riceType:'흰쌀밥',_scrolledEnd:false,simpleShown:false};
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V1.5';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V1.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3536,7 +3548,7 @@ P({title:'평소 밥은 어떤 걸 드세요?',sub:'국밥·백반처럼 밥이 
 
 /* 하루 몇 끼 */
 P({title:'하루에 몇 끼 드세요?',sub:'간식·야식은 빼고 끼니 수만 알려주세요.',
-  render:()=>opts([[1,'1끼','🍽️'],[2,'2끼','🍴'],[3,'3끼','🥢']],'mealsPerDay'),valid:()=>S.mealsPerDay!=null});
+  render:()=>opts([[1,'1끼','🍽️'],[2,'2끼','🍴'],[3,'3끼','🥢'],[4,'4끼','🍽️'],[5,'5끼 이상','🍱']],'mealsPerDay'),valid:()=>S.mealsPerDay!=null});
 
 /* 식사 시간 (첫 끼 + 마지막 식사) */
 P({title:'식사 시간',sub:'하루 첫 끼와 마지막 식사 시간을 알려주세요.',render:()=>`
@@ -3595,14 +3607,16 @@ P({title:'일주일 음주',sub:'마신 날을 눌러 주류와 잔 수를 넣�
 P({title:'흡연·스트레스',render:()=>{
   let h=`<div class="lbl">담배(전자담배 포함)를 피우시나요?</div>`+opts([['none','안 피워요','🚭'],['cig','일반 담배',uic('smoke_cig')],['vape','전자담배',uic('smoke_vape')]],'smokeType');
   if(S.smokeType&&S.smokeType!=='none'){
-    h+=`<div class="lbl">얼마나 자주 피우세요?</div>`+opts([['low','가끔 (주 몇 번)','🌬️'],['high','매일 조금','🚬'],['vhigh','매일 자주 (하루 종일)','🔥']],'smokeAmt');
-    if(S.smokeType==='vape'||S.smokeType==='both')h+=`<p class="muted" style="font-size:13px;margin-top:6px">전자담배는 사용 빈도 기준으로 골라주세요.</p>`;
+    var _un=(S.smokeType==='vape')?'회':'개비';
+    h+=`<div class="lbl">하루 평균 몇 ${_un} 피우세요?</div>
+    <div class="frow"><input type="number" inputmode="numeric" placeholder="예: 10" value="${S.smokeCigs!=null?S.smokeCigs:''}" oninput="S.smokeCigs=(this.value===''?null:+this.value)" style="text-align:right"><span class="unit">${_un}/일</span></div>
+    <p class="muted" style="font-size:12.5px;margin-top:6px">담배는 양과 무관하게 해롭지만, 많이 피울수록 비타민C·E 등 항산화 영양소가 더 빨리 소모돼요.</p>`;
   }
   h+=`<div class="lbl">스트레스</div>`+opts([[0,'낮음','😌'],[1,'보통','🙂'],[2,'높음','😟'],[3,'매우 높음','😣']],'stress');
   return h;},valid:()=>true});
 
-/* 16. 종합영양제 */
-P({title:'종합영양제를 드시나요?',sub:'월 기준 금액대를 고르고, 드시는 제품이 있으면 이름도 적어주세요.',render:()=>{
+/* 16. 종합영양제 — 제거(섭취 전=식단만 기준). show:false로 숨김 */
+P({show:()=>false,title:'종합영양제를 드시나요?',sub:'월 기준 금액대를 고르고, 드시는 제품이 있으면 이름도 적어주세요.',render:()=>{
   var PR=[['none','안 먹어요','🚫'],['2만↓','월 2만원 이하','💊'],['2~4만','월 2~4만원','💊'],['4~7만','월 4~7만원','💊'],['7~12만','월 7~12만원','💊'],['12만↑','월 12만원 이상','💊']];
   var h=`<div class="opts">`+PR.map(function(o){return `<button class="opt ${S.mvPrice===o[0]?'on':''}" onclick="S.mvPrice='${o[0]}';S.mvStar=priceToStar('${o[0]}');upd()"><span class="oe">${o[2]}</span>${o[1]}</button>`;}).join('')+`</div>`;
   if(S.mvPrice&&S.mvPrice!=='none'){
@@ -3614,7 +3628,7 @@ P({title:'종합영양제를 드시나요?',sub:'월 기준 금액대를 고르�
 },valid:()=>!!S.mvPrice});
 
 /* 17. 질환·약 */
-P({title:'앓는 병이나 복용 약이 있나요?',sub:'해당되는 것만 골라주세요. 없으면 그냥 넘어가도 돼요.',render:()=>{
+P({title:'앓는 병이나 복용 약이 있나요?',sub:'질병을 진단·처방하려는 게 아니에요. 약과 함께 피해야 할 영양제를 거르고, 질환으로 생기는 영양 손실을 반영하려고 여쭤봐요. 해당되는 것만 골라주세요.',render:()=>{
   const picked=(S.health&&S.health.length)||(S.meds&&S.meds.length);
   return `
   <div class="lbl">건강 특이사항</div><div class="hmgrid">${multi(Object.keys(DATA.safety.health),'health')}</div>
@@ -3977,7 +3991,8 @@ function buildInput(){
   const ex=deriveExInt();   // 운동(공용 헬퍼)
   let alcDays=0,maxCup=0; S.alcWeek.forEach(c=>{if(c&&c.types&&c.types.length){alcDays++;const lvl=c.cups<=2?0:c.cups<=4?1:2;if(lvl>maxCup)maxCup=lvl;}});
   const alcFreq=alcDays===0?0:alcDays<=2?1:alcDays<=4?2:3;
-  const smoke=(!S.smokeType||S.smokeType==='none')?'none':S.smokeAmt;
+  const _scig=(S.smokeCigs==null?10:+S.smokeCigs);
+  const smoke=(!S.smokeType||S.smokeType==='none')?'none':(_scig>=15?'vhigh':_scig>=5?'high':'low');
   return {demographics:{sex:S.sex,birthYear:S.birthYear,birthdayPassed:S.birthdayPassed,height:S.height,weight:S.weight,abdomen:S.abdomen,thigh:S.thigh},
     food:{meals:_meals,mealAmt:_mealAmt,veg:S.veg,fruit:S.fruit,snack:S.snack,nightFreq:+S.nightFreq||0},
     beverage:S.bev,
