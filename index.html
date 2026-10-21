@@ -3444,7 +3444,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V2.0';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V2.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4230,22 +4230,22 @@ function mhpBAbar(name,before,after){
 /* ================= 실제 유사나 제품/팩 데이터 (안내서 실측) ================= */
 // 헬스팩 하루(2포) 미량 %영양성분기준치 — 프리미엄4팩 & (옵티마이저+헬스팩) 공통 미량 "섭취 후" 기반
 var HP_MICRO={비타민A:108,비타민C:1000,비타민D:200,비타민E:1221,비타민K:571,비타민B1:2500,비타민B2:2143,나이아신:267,판토텐산:1800,비타민B6:2133,비오틴:1000,엽산:100,비타민B12:8333,칼슘:70,마그네슘:156,아연:143,셀렌:243,구리:250,망간:67,요오드:100,크롬:667,몰리브덴:200};
-var HEALTHPAK={id:'hp',name:'헬스팩',price:'',desc:'종합비타민·미네랄 기본 (비타에이오·코어미네랄·마그네칼D·인셀리전스 플러스)',has:['마그네칼 D','비타민D','폴리C','부스터 C600']};
+var HEALTHPAK={id:'hp',name:'헬스팩',price:'',func:'종합 비타민·미네랄로 하루 영양의 기본을 채워요',desc:'비타에이오·코어미네랄·마그네칼D·인셀리전스 플러스',has:['마그네칼 D','비타민D','폴리C','부스터 C600']};
 var PACKS={
- energy:{name:'에너지 부스터 팩',price:'256,000원',premium:true,ex:{omega3:1},desc:'헬스팩 + 바이오메가 + 프로후라바놀 C300',has:['바이오메가','프로후라바놀 C300']},
- liver:{name:'간 건강 팩',price:'262,000원',premium:true,ex:{omega3:1,liver:1},desc:'헬스팩 + 바이오메가 + 헤파실 플러스',has:['바이오메가','헤파실 플러스']},
- eye:{name:'눈 건강 팩',price:'249,700원',premium:true,ex:{omega3:1,eye:1},desc:'헬스팩 + 바이오메가 + 비전엑스 디에스',has:['바이오메가','비전엑스 디에스']},
- bp:{name:'혈압 건강 팩',price:'284,000원',premium:true,ex:{omega3:1,coq10:1},desc:'헬스팩 + 바이오메가 + 코큐논 30',has:['바이오메가','코큐논 30']},
- best:{name:'베스트 옵티마이저 팩',price:'267,500원',premium:false,ex:{omega3:1,coq10:1,liver:1},desc:'바이오메가 + 헤파실 + 코큐논 30 + 프로후라바놀 C300+',has:['바이오메가','헤파실 플러스','코큐논 30','프로후라바놀 C300']},
- immune:{name:'면역 건강 팩',price:'283,500원',premium:false,ex:{aloe:1,betaglucan:1},micro:{비타민C:600,아연:71},desc:'알로엔즈 + 프로후라바놀 C300+ + 프로글루카뮨',has:['알로엔즈 플러스','프로후라바놀 C300','프로글루카뮨','폴리C','부스터 C600']},
- fatclean:{name:'체지방 클린 팩',price:'251,500원',premium:false,ex:{aloe:1,catechin:1,liver:1},desc:'알로엔즈 + 헤파실 + 메타볼리즘',has:['알로엔즈 플러스','헤파실 플러스','메타볼리즘 플러스']},
- bone:{name:'뼈·관절 건강 팩',price:'132,000원',premium:false,ex:{omega3:1,glucosamine:1},micro:{칼슘:36,마그네슘:80,비타민D:650,비타민C:160},desc:'바이오메가 + 프로코사 + 마그네칼 D + 비타민 D',has:['바이오메가','프로코사 글루코사민','마그네칼 D','비타민D']}
+ energy:{name:'마이헬스팩 (에너지 부스터)',price:'256,000원',premium:true,ex:{omega3:1},func:'종합 영양에 오메가3·항산화를 더해 활력·혈행·항산화에 도움',desc:'헬스팩 + 바이오메가 + 프로후라바놀 C300',has:['바이오메가','프로후라바놀 C300']},
+ liver:{name:'마이헬스팩 (간 건강)',price:'262,000원',premium:true,ex:{omega3:1,liver:1},func:'종합 영양에 밀크씨슬·오메가3를 더해 간 건강·혈행에 도움',desc:'헬스팩 + 바이오메가 + 헤파실 플러스',has:['바이오메가','헤파실 플러스']},
+ eye:{name:'마이헬스팩 (눈 건강)',price:'249,700원',premium:true,ex:{omega3:1,eye:1},func:'종합 영양에 루테인·오메가3를 더해 눈 건강·혈행에 도움',desc:'헬스팩 + 바이오메가 + 비전엑스 디에스',has:['바이오메가','비전엑스 디에스']},
+ bp:{name:'마이헬스팩 (혈압 건강)',price:'284,000원',premium:true,ex:{omega3:1,coq10:1},func:'종합 영양에 코엔자임Q10·오메가3를 더해 혈압·혈행 건강에 도움',desc:'헬스팩 + 바이오메가 + 코큐논 30',has:['바이오메가','코큐논 30']},
+ best:{name:'베스트 옵티마이저 팩',price:'267,500원',premium:false,ex:{omega3:1,coq10:1,liver:1},func:'오메가3·코엔자임Q10·항산화로 혈행·항산화를 집중 보강',desc:'바이오메가 + 헤파실 + 코큐논 30 + 프로후라바놀 C300+',has:['바이오메가','헤파실 플러스','코큐논 30','프로후라바놀 C300']},
+ immune:{name:'면역 건강 팩',price:'283,500원',premium:false,ex:{aloe:1,betaglucan:1},micro:{비타민C:600,아연:71},func:'비타민C·베타글루칸으로 면역·항산화에 도움',desc:'알로엔즈 + 프로후라바놀 C300+ + 프로글루카뮨',has:['알로엔즈 플러스','프로후라바놀 C300','프로글루카뮨','폴리C','부스터 C600']},
+ fatclean:{name:'체지방 클린 팩',price:'251,500원',premium:false,ex:{aloe:1,catechin:1,liver:1},func:'녹차 카테킨·식물 효소로 체지방·소화 관리에 도움',desc:'알로엔즈 + 헤파실 + 메타볼리즘',has:['알로엔즈 플러스','헤파실 플러스','메타볼리즘 플러스']},
+ bone:{name:'뼈·관절 건강 팩',price:'132,000원',premium:false,ex:{omega3:1,glucosamine:1},micro:{칼슘:36,마그네슘:80,비타민D:650,비타민C:160},func:'글루코사민·칼슘·마그네슘·비타민D로 뼈·관절 건강에 도움',desc:'바이오메가 + 프로코사 + 마그네칼 D + 비타민 D',has:['바이오메가','프로코사 글루코사민','마그네칼 D','비타민D']}
 };
 var EXLABEL={omega3:'오메가3(EPA·DHA)',coq10:'코엔자임Q10',liver:'간 건강(밀크씨슬)',eye:'루테인·지아잔틴',aloe:'알로에·소화효소',betaglucan:'베타글루칸(면역)',catechin:'녹차 카테킨',glucosamine:'글루코사민',probiotic:'유산균',iso:'대두이소플라본'};
 var XP={
- nutrimeal:{name:'뉴트리밀 액티브',note:'식사 대체 쉐이크 · 단백질 20g·식이섬유 10g, 저GI',macroAdd:{protein:33,fiber:40}},
- fibergy:{name:'화이버지 플러스',note:'식이섬유 12g (차전자피)',macroAdd:{fiber:48}},
- probiotic:{name:'프로바이오틱',note:'유산균 100억 CFU',ex:{probiotic:1}}
+ nutrimeal:{name:'뉴트리밀 액티브',note:'저GI·고단백 조제식으로 혈당·체중 관리에 도움',macroAdd:{protein:33,fiber:40}},
+ fibergy:{name:'화이버지 플러스',note:'식이섬유로 배변 활동을 원활하게',macroAdd:{fiber:48}},
+ probiotic:{name:'프로바이오틱',note:'유산균으로 장 건강에 도움',ex:{probiotic:1}}
 };
 // 관심사 → 1순위 매핑 (사장님 지정)
 function mhpReco(r,v){
@@ -4253,25 +4253,30 @@ function mhpReco(r,v){
  if(r.weightSignal&&labels.indexOf('체중')<0)labels.push('체중');
  var has=function(c){return labels.indexOf(c)>=0;};
  var P=[],tag='';
- if(has('체중')||has('혈당')){P=[{t:'x',k:'nutrimeal'},{t:'hp'},{t:'pack',k:'fatclean'}];tag='체중·혈당';}
+ var wt=has('체중')||has('혈당');
+ if(wt){   // 체중/혈당 = 1.뉴트리밀 + 2.조합별 팩
+   if(has('간')){P=[{t:'x',k:'nutrimeal'},{t:'pack',k:'liver'}];tag='체중·혈당·간';}
+   else if(has('눈 건강')){P=[{t:'x',k:'nutrimeal'},{t:'pack',k:'eye'}];tag='체중·혈당·눈';}
+   else if(has('피로')){P=[{t:'x',k:'nutrimeal'},{t:'pack',k:'energy'}];tag='체중·혈당·피로';}
+   else {P=[{t:'x',k:'nutrimeal'},{t:'pack',k:'bp'}];tag='체중·혈당';}
+ }
  else if(has('변비')){P=[{t:'x',k:'fibergy'},{t:'x',k:'probiotic'},{t:'hp'}];tag='변비';}
  else if(has('간')&&has('혈압')){P=[{t:'hp'},{t:'pack',k:'best'}];tag='간·혈압';}
  else if(has('간')){P=[{t:'pack',k:'liver'}];tag='간';}
  else if(has('혈압')){P=[{t:'pack',k:'bp'}];tag='혈압';}
- else if(has('면역')){P=[{t:'hp'},{t:'pack',k:'immune'}];tag='면역';}
- else if(has('뼈·관절')){P=[{t:'hp'},{t:'pack',k:'bone'}];tag='뼈·관절';}
+ else if(has('뼈·관절')){P=[{t:'pack',k:'bone'},{t:'hp'}];tag='뼈·관절';}
  else if(has('눈 건강')){P=[{t:'hp'},{t:'pack',k:'eye'}];tag='눈 건강';}
  else if(has('피로')){P=[{t:'pack',k:'energy'}];tag='피로';}
- else {P=[{t:'pack',k:'energy'}];tag='종합 영양';}
+ else {P=[{t:'hp'}];tag='종합 영양';}   // 면역 포함 기본 = 헬스팩
  return {primary:P,tag:tag,labels:labels};
 }
 function mhpResolve(rec){return rec.primary.map(function(p){
- if(p.t==='hp')return {name:HEALTHPAK.name,desc:HEALTHPAK.desc,kind:'hp',ex:{},micro:HP_MICRO,price:'',has:HEALTHPAK.has||[],fullMV:true};
- if(p.t==='pack'){var pk=PACKS[p.k];return {name:pk.name,desc:pk.desc,kind:'pack',ex:pk.ex||{},micro:(pk.premium?HP_MICRO:(pk.micro||{})),premium:pk.premium,price:pk.price,has:pk.has||[],fullMV:!!pk.premium};}
- var x=XP[p.k];return {name:x.name,desc:x.note,kind:'x',ex:x.ex||{},micro:{},macroAdd:x.macroAdd||{},price:'',has:[]};
+ if(p.t==='hp')return {name:HEALTHPAK.name,func:HEALTHPAK.func,desc:HEALTHPAK.desc,kind:'hp',ex:{},micro:HP_MICRO,price:'',has:HEALTHPAK.has||[],fullMV:true};
+ if(p.t==='pack'){var pk=PACKS[p.k];return {name:pk.name,func:pk.func,desc:pk.desc,kind:'pack',ex:pk.ex||{},micro:(pk.premium?HP_MICRO:(pk.micro||{})),premium:pk.premium,price:pk.price,has:pk.has||[],fullMV:!!pk.premium};}
+ var x=XP[p.k];return {name:x.name,func:x.note,desc:'',kind:'x',ex:x.ex||{},micro:{},macroAdd:x.macroAdd||{},price:'',has:[]};
 });}
 // 색상: 습관카드 팔레트 재사용(주의#F0503F·보통#D99000·양호#5E9E3E·좋음#17A6B8). macro는 양방향(120>보통 140>주의)
-var MHP_FILL='#1E3A6B'; // 유사나로 채워지는 연장분 = 브랜드 네이비
+var MHP_FILL='#17A6B8'; // 유사나로 채워지는 연장분 = '좋음' 색(청록). 식사막대 우측끝을 둥글게 해 구분
 function mhpColor(v,macro){
  if(macro){if(v<40)return '#F0503F';if(v<60)return '#D99000';if(v<80)return '#5E9E3E';if(v<=120)return '#17A6B8';if(v<140)return '#D99000';return '#F0503F';}
  if(v<40)return '#F0503F';if(v<60)return '#D99000';if(v<80)return '#5E9E3E';return '#17A6B8';
@@ -4284,8 +4289,8 @@ function mhpBar3(name,before,after,macro){
  return '<div class="babar" style="margin:11px 0">'
   +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span class="bapct" style="font-size:13.5px;font-weight:800"><span style="color:'+mhpColor(before,macro)+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
   +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>':'')
-  +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+mhpColor(before,macro)+'"></div>'
-  +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:'+MHP_FILL+';transition:width .85s cubic-bezier(.25,0,.2,1)"></i>'
+  +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+mhpColor(before,macro)+';border-radius:99px;z-index:2;box-shadow:'+(ext>0?'2.5px 0 0 0 #eef2f0':'none')+'"></div>'
+  +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:'+MHP_FILL+';border-radius:99px;transition:width .85s cubic-bezier(.25,0,.2,1)"></i>'
   +'</div></div>';
 }
 // 섭취 전 / 섭취 후 토글
@@ -4298,18 +4303,43 @@ function mhpSetGraph(mode){
 }
 function mhpAnimGraph(){ document.querySelectorAll('#result .baext').forEach(function(el){el.style.width='0%';}); setTimeout(function(){mhpSetGraph('after');},350); setTimeout(function(){mhpGiSet('meal',true);},300); }
 var _mhpGi=50;
-// GI: 식사 시 / 뉴트리밀 섭취 시 토글
+// 대량영양소 전용 막대 (식사 시 ↔ 뉴트리밀 섭취 시로 값이 변동). scale 200, 100%가 중앙
+function mhpMacroBar(name,mealV,nutriV){
+ mealV=Math.round(mealV); nutriV=Math.round(nutriV);
+ var mw=Math.min(100,mealV/200*100);
+ return '<div class="mbar" data-meal="'+mealV+'" data-nutri="'+nutriV+'" style="margin:11px 0">'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span class="mbarpct" style="font-size:13.5px;font-weight:800;color:'+mhpColor(mealV,true)+'">'+mealV+'%</span></div>'
+  +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden"><div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>'
+  +'<i class="mbarfill" style="position:absolute;left:0;top:0;bottom:0;width:'+mw+'%;background:'+mhpColor(mealV,true)+';border-radius:99px;transition:width .7s cubic-bezier(.25,0,.2,1),background .4s"></i>'
+  +'</div></div>';
+}
+function mhpMacroMode(mode){
+ var nutri=mode==='nutri';
+ document.querySelectorAll('#result .mbar').forEach(function(b){
+  var v=+(nutri?b.dataset.nutri:b.dataset.meal), col=mhpColor(v,true);
+  var f=b.querySelector('.mbarfill'); if(f){f.style.width=Math.min(100,v/200*100)+'%';f.style.background=col;}
+  var p=b.querySelector('.mbarpct'); if(p){p.textContent=v+'%';p.style.color=col;}
+ });
+ var a=document.getElementById('mbMeal'),bb=document.getElementById('mbNutri');
+ if(a)a.classList.toggle('on',!nutri); if(bb)bb.classList.toggle('on',nutri);
+ mhpGiSet(mode);   // GI도 같이 변동
+}
+// GI 웨지 게이지 — 높음으로 갈수록 그래프가 커지는(세로로 자라는) 삼각형, 현재 GI까지 채움
 function mhpGiSet(mode,initial){
- var mk=document.getElementById('giMask'), nv=document.getElementById('giNowVal'), lm=document.getElementById('giLowMark');
- if(!mk)return;
- var target=mode==='nutri'?18:_mhpGi;
- if(initial)mk.style.left='100%';
- setTimeout(function(){mk.style.left=Math.min(100,target)+'%';},initial?90:0);
- if(nv){var cur=initial?0:(+nv.textContent||0); var dir=target>=cur?1:-1;
-  var t=setInterval(function(){var stp=Math.max(1,Math.round(Math.abs(target-cur)/6)); cur+=dir*stp; if((dir>0&&cur>=target)||(dir<0&&cur<=target)){cur=target;clearInterval(t);} nv.textContent=cur;},34);}
+ var clip=document.getElementById('giClipR'), nv=document.getElementById('giNowVal'), lm=document.getElementById('giLowMark');
+ if(!clip)return;
+ var W=312,X0=4, target=mode==='nutri'?18:_mhpGi;
+ var endW=Math.min(100,target)/100*W, startW=initial?0:(parseFloat(clip.getAttribute('width'))||0), startN=initial?0:(parseInt(nv&&nv.textContent)||0);
+ var t0=null;
+ function step(ts){ if(!t0)t0=ts; var p=Math.min(1,(ts-t0)/800), e=1-Math.pow(1-p,3);
+  var w=startW+(endW-startW)*e; clip.setAttribute('width',w);
+  if(nv)nv.textContent=Math.round(startN+(target-startN)*e);
+  if(p<1)requestAnimationFrame(step);
+ }
+ requestAnimationFrame(step);
  if(lm)lm.style.opacity=mode==='nutri'?'1':'0';
- var m=document.getElementById('giMeal'),n=document.getElementById('giNutri');
- if(m)m.classList.toggle('on',mode!=='nutri'); if(n)n.classList.toggle('on',mode==='nutri');
+ var a=document.getElementById('giMeal'),b=document.getElementById('giNutri');
+ if(a)a.classList.toggle('on',mode!=='nutri'); if(b)b.classList.toggle('on',mode==='nutri');
 }
 function showMHP(){
   try{
@@ -4326,28 +4356,36 @@ function showMHP(){
     var nutBA=function(k){var n=(r.nut||[]).filter(function(x){return x.k===k;})[0]; if(!n)return null; var bef=(n.pctDiet!=null?n.pctDiet:n.pct); var aft=Math.max(bef,microAfter[k]||0); return {n:k,b:Math.min(100,bef),a:Math.min(100,aft)};};
     var vits=['비타민C','비타민D','비타민A','비타민E','비타민K','비타민B1','비타민B2','나이아신','판토텐산','비타민B6','비오틴','엽산','비타민B12'].map(nutBA).filter(Boolean);
     var mins=['칼슘','마그네슘','아연','철','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);
-    var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000;
+    var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000, meals=Math.max(1,+(S.mealsPerDay)||3);
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
-    var mProt=p100(M?M.prot:0,wkg*1.0), mFib=p100(M?M.fiber:0,27), mCarb=Math.min(200,p100(M?M.carb:0,tdee*0.55/4)), mFat=Math.min(200,p100(M?M.fat:0,tdee*0.28/9));
-    var macros=[{n:'단백질',b:Math.min(200,mProt),a:mProt<100?Math.min(100,mProt+(macroAdd.protein||0)):Math.min(200,mProt)},{n:'탄수화물',b:mCarb,a:mCarb},{n:'지방',b:mFat,a:mFat},{n:'식이섬유',b:Math.min(200,mFib),a:mFib<100?Math.min(100,mFib+(macroAdd.fiber||0)):Math.min(200,mFib)}];
+    var protT=wkg*1.2, carbT=tdee*0.55/4, fatT=tdee*0.28/9, fibT=27;    // 단백질=최적섭취(1.2g/kg) 기준
+    var Pg=M?M.prot:0, Cg=M?M.carb:0, Fg=M?M.fat:0, FBg=M?M.fiber:0;
+    var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(200,p100(Cg,carbT)), mFat=Math.min(200,p100(Fg,fatT)), mFib=Math.min(200,p100(FBg,fibT));
+    // 뉴트리밀 한 끼 대체 시 (단백20·탄24·지6·식이섬유10g — 기존 한 끼분 빼고 더함)
+    var nProt=Math.min(200,p100(Pg-Pg/meals+20,protT)), nCarb=Math.min(200,p100(Cg-Cg/meals+24,carbT)), nFat=Math.min(200,p100(Fg-Fg/meals+6,fatT)), nFib=Math.min(200,p100(FBg-FBg/meals+10,fibT));
     var fishSig=0; try{(S.basket||[]).concat(S.nightBasket||[]).forEach(function(nm){if(/생선|고등어|연어|참치|회|조림|멸치|꽁치|삼치/.test(nm))fishSig++;});}catch(e){}
-    var efaB=Math.max(15,Math.min(70,22+fishSig*14)), coqB=Math.max(35,Math.min(90,Math.round(90-Math.max(0,age-30)*1.3)));
-    var others=[{n:'필수지방산(오메가3)',b:efaB,a:exSet.omega3?98:efaB},{n:'코엔자임Q10',b:coqB,a:exSet.coq10?92:coqB}];
+    var efaB=Math.max(15,Math.min(70,22+fishSig*14)), coqB=Math.max(22,Math.min(60,Math.round(60-Math.max(0,age-30)*1.0)));   // CoQ10=체내합성+소량식품, 나이들수록↓
+    mins.push({n:'필수지방산(오메가3)',b:efaB,a:exSet.omega3?98:efaB});
+    mins.push({n:'코엔자임Q10',b:coqB,a:exSet.coq10?92:coqB});
     var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:15.5px;margin:17px 0 6px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
+    /* --- 02 미량영양소 (섭취 전/후) --- */
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
     h+='<p class="leg" style="margin:0 0 7px">막대 색 = 지금 충족도 (<span style="color:#F0503F;font-weight:800">부족</span> → <span style="color:#17A6B8;font-weight:800">충분</span>) &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
     h+='<div class="segbtns"><button id="gbBefore" class="segbtn" onclick="mhpSetGraph(\'before\')">섭취 전</button><button id="gbAfter" class="segbtn on" onclick="mhpSetGraph(\'after\')">섭취 후</button></div>';
     h+=baGroup('미량영양소 · 비타민',vits,false);
     h+=baGroup('미량영양소 · 미네랄',mins,false);
-    h+=baGroup('필수지방산 · 코엔자임Q10',others,false);
-    h+=baGroup('대량영양소',macros,true);
-    // GI 게이지 (채워지는 방식 + 10~30녹/30~55연두/55~65노랑/65~75주황/75~100빨강)
+    h+='</div>';
+    /* --- 03 대량영양소 & 혈당 (식사 ↔ 뉴트리밀 토글) --- */
     var gi=Math.round((M&&M.giAvg)?M.giAvg:50); _mhpGi=gi;
+    h+='<div class="sec"><h3><span class="n">03</span> 대량영양소 &amp; 혈당</h3>';
+    h+='<p class="leg" style="margin:-2px 0 9px">한 끼를 저GI 조제식 <b>뉴트리밀</b>로 바꾸면 이렇게 변해요. 늘어나는 것도, 줄어드는 것도 있어요.</p>';
+    h+='<div class="segbtns"><button id="mbMeal" class="segbtn on" onclick="mhpMacroMode(\'meal\')">식사 시</button><button id="mbNutri" class="segbtn" onclick="mhpMacroMode(\'nutri\')">🥤 뉴트리밀 섭취 시</button></div>';
+    h+='<div style="font-weight:800;font-size:15.5px;margin:15px 0 6px;color:#2C3B33">대량영양소 <span style="font-weight:400;font-size:12px;color:var(--muted)">(100%가 적정)</span></div>';
+    h+=mhpMacroBar('단백질',mProt,nProt)+mhpMacroBar('탄수화물',mCarb,nCarb)+mhpMacroBar('지방',mFat,nFat)+mhpMacroBar('식이섬유',mFib,nFib);
     h+='<div style="font-weight:800;font-size:15.5px;margin:20px 0 8px;color:#2C3B33">혈당지수(GI) — 식사가 혈당 올리는 속도</div>';
-    h+='<div style="position:relative;height:24px;border-radius:99px;overflow:hidden;background:linear-gradient(90deg,#1FA971 0 30%,#86C94A 30% 55%,#E0B000 55% 65%,#F5820B 65% 75%,#E5484D 75% 100%)"><div id="giMask" style="position:absolute;top:0;bottom:0;left:100%;right:0;background:#EEF2F0;transition:left 1.1s cubic-bezier(.3,0,.2,1)"></div></div>';
-    h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px"><span>좋음 10</span><span>30</span><span>55</span><span>75</span><span>높음 100</span></div>';
-    h+='<div style="text-align:center;margin-top:10px"><span style="font-weight:800;font-size:16px">예상 GI </span><span id="giNowVal" style="color:#17364f;font-size:24px;font-weight:800">0</span></div>';
-    h+='<div style="text-align:center;margin-top:10px"><div class="segbtns"><button id="giMeal" class="segbtn on" onclick="mhpGiSet(\'meal\')">식사 시</button><button id="giNutri" class="segbtn" onclick="mhpGiSet(\'nutri\')">🥤 뉴트리밀 섭취 시</button></div></div>';
+    h+='<svg viewBox="0 0 320 84" preserveAspectRatio="none" style="width:100%;height:82px;display:block"><defs><linearGradient id="giGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5E9E3E"/><stop offset=".30" stop-color="#86C94A"/><stop offset=".55" stop-color="#E0B000"/><stop offset=".75" stop-color="#F5820B"/><stop offset="1" stop-color="#F0503F"/></linearGradient><clipPath id="giClip"><rect id="giClipR" x="4" y="0" width="0" height="84"/></clipPath></defs><path d="M4,80 L316,80 L316,8 Z" fill="#E8ECEA"/><path d="M4,80 L316,80 L316,8 Z" fill="url(#giGrad)" clip-path="url(#giClip)"/></svg>';
+    h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:2px"><span>좋음 10</span><span>30</span><span>55</span><span>75</span><span>높음 100</span></div>';
+    h+='<div style="text-align:center;margin-top:10px"><span style="font-weight:800;font-size:16px">예상 GI </span><span id="giNowVal" style="color:#17364f;font-size:26px;font-weight:800">0</span></div>';
     h+='<div id="giLowMark" style="opacity:0;transition:opacity .6s;margin-top:10px;background:#E3F4F6;border-radius:11px;padding:12px 14px;text-align:center"><b style="color:#13889A">뉴트리밀로 대체하면 GI가 ≈ 18로 뚝 떨어져요 ↓</b><div class="leg" style="margin-top:3px">저GI 조제식이라 혈당을 천천히 올려 체중·혈당 관리에 유리해요</div></div>';
     h+='</div>';
 
@@ -4367,7 +4405,7 @@ function showMHP(){
      {n:'이소플라본 플러스',c:['갱년기'],fem:true},
      {n:'피지 에너지 드링크',c:['피로']},{n:'코어 아미노 드링크',c:['피로']},{n:'액티브 미네랄 드링크',c:['피로']}
     ];
-    var RBLURB={'프로바이오틱':'장 건강·면역 유산균','바이오메가':'오메가3 혈행·두뇌','프로후라바놀 C300':'강력 항산화 폴리페놀','폴리C':'고흡수 비타민C','코큐논 30':'세포 에너지·심장','비타민D':'뼈·면역 비타민D','화이버지 플러스':'식이섬유·장 건강','e프라임':'세포 항산화 보호','부스터 C600':'고함량 비타민C','마그네칼 D':'칼슘·마그네슘·D','FOS 액티브':'유익균 먹이 식이섬유','유기농 곡물 효소':'소화 돕는 효소','프로글루카뮨':'베타글루칸 면역','프로코사 글루코사민':'관절 글루코사민','비전엑스 디에스':'루테인 눈 건강','헤파실 플러스':'간 밀크씨슬','이소플라본 플러스':'갱년기 대두이소플라본','피지 에너지 드링크':'활력 에너지','코어 아미노 드링크':'아미노산·근육','액티브 미네랄 드링크':'미네랄 수분보충'};
+    var RBLURB={'프로바이오틱':'유산균으로 장 건강에 도움','바이오메가':'오메가3로 혈행 개선·중성지질 관리','프로후라바놀 C300':'폴리페놀·비타민C로 항산화','폴리C':'비타민C로 항산화·면역','코큐논 30':'코엔자임Q10으로 항산화·활력','비타민D':'비타민D로 뼈·면역 건강','화이버지 플러스':'식이섬유로 배변 활동 원활','e프라임':'비타민E·셀렌으로 항산화','부스터 C600':'고함량 비타민C로 항산화·면역','마그네칼 D':'칼슘·마그네슘·D로 뼈 건강','FOS 액티브':'프리바이오틱스로 유익균 증식','유기농 곡물 효소':'효소로 소화를 도움','프로글루카뮨':'베타글루칸으로 면역 건강','프로코사 글루코사민':'글루코사민으로 관절 건강','비전엑스 디에스':'루테인으로 눈 건강','헤파실 플러스':'밀크씨슬로 간 건강','이소플라본 플러스':'대두 이소플라본으로 갱년기 여성 건강','피지 에너지 드링크':'비타민B군으로 에너지 대사','코어 아미노 드링크':'아미노산으로 근육·단백질 보충','액티브 미네랄 드링크':'전해질·미네랄 보충'};
     var L=rec.labels;
     var scored=ADDPOOL.filter(function(p){return !used[p.n]&&!(p.fem&&v.sex!=='f');}).map(function(p){var s=0,mc=null;p.c.forEach(function(c){if(L.indexOf(c)>=0){s++;if(!mc)mc=c;}});return {n:p.n,s:s,c:mc};});
     scored.sort(function(a,b){return b.s-a.s;});
@@ -4378,12 +4416,12 @@ function showMHP(){
     h+='<div class="sec"><h3><span class="n">🎯</span> 나에게 맞는 유사나 순위</h3>';
     h+='<p class="leg" style="margin:-2px 0 13px">중요한 순서예요. <b>다 챙기면 가장 좋지만</b>, 형편에 맞게 위에서부터 골라 드시면 돼요.</p>';
     var rank=0;
-    items.forEach(function(it){rank++;var exTags=Object.keys(it.ex||{}).map(function(e){return EXLABEL[e]||e;});var top=rank===1;
-      h+='<div style="display:flex;gap:12px;padding:13px 0;'+(rank>1?'border-top:1px solid var(--line,#eef2f0)':'')+'"><div style="flex:0 0 38px;height:38px;border-radius:11px;background:'+(top?'#1E3A6B':'#E9EEF8')+';color:'+(top?'#fff':'#1E3A6B')+';font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center">'+rank+'</div><div style="flex:1"><div style="font-weight:800;font-size:17.5px">'+it.name+(it.price?' <span style="font-size:13px;font-weight:600;color:var(--muted)">'+it.price+'</span>':'')+'</div><div class="leg" style="margin-top:3px">'+it.desc+'</div>'+(exTags.length?'<div>'+exTags.map(function(t){return mhpPill(t,'#E3F4F6','#13889A');}).join('')+'</div>':'')+'</div></div>';});
-    extra.forEach(function(x){rank++;var rs=x.c?("'"+x.c+"' 관심 보완"):(RBLURB[x.n]||'부족한 영양 보완');
+    items.forEach(function(it){rank++;var top=rank===1;
+      h+='<div style="display:flex;gap:12px;padding:13px 0;'+(rank>1?'border-top:1px solid var(--line,#eef2f0)':'')+'"><div style="flex:0 0 38px;height:38px;border-radius:11px;background:'+(top?'#1E3A6B':'#E9EEF8')+';color:'+(top?'#fff':'#1E3A6B')+';font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center">'+rank+'</div><div style="flex:1"><div style="font-weight:800;font-size:17.5px">'+it.name+(it.price?' <span style="font-size:13px;font-weight:600;color:var(--muted)">'+it.price+'</span>':'')+'</div><div class="leg" style="margin-top:3px">'+(it.func||it.desc||'')+'</div>'+(it.desc?'<div style="font-size:12px;color:var(--muted);margin-top:3px">구성: '+it.desc+'</div>':'')+'</div></div>';});
+    extra.forEach(function(x){rank++;var rs=RBLURB[x.n]||'부족한 영양 보완';
       h+='<div style="display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line,#eef2f0)"><div style="flex:0 0 38px;height:38px;border-radius:11px;background:#E9EEF8;color:#1E3A6B;font-weight:800;font-size:17px;display:flex;align-items:center;justify-content:center">'+rank+'</div><div style="flex:1"><div style="font-weight:700;font-size:16.5px">'+x.n+'</div><div class="leg" style="margin-top:2px">'+rs+'</div></div></div>';});
     if(warn.length)h+='<div style="margin-top:12px">'+mhpPill('⚠ 복용 주의','#FDEDEC','#C0392B')+'<div class="leg" style="color:#C0392B;margin-top:4px">'+warn.join(', ')+' — 전문가 상담 후 드세요.</div></div>';
-    if(rec.tag==='체중·혈당')h+='<p class="leg" style="margin-top:12px;background:#F4F8F6;border-radius:10px;padding:10px 12px">💡 고GI·체중엔 <b>뉴트리밀 액티브로 한 끼 대체</b>가 가장 빨라요(위 GI 참고).</p>';
+    if(rec.tag.indexOf('체중')>=0)h+='<p class="leg" style="margin-top:12px;background:#F4F8F6;border-radius:10px;padding:10px 12px">💡 고GI·체중엔 <b>뉴트리밀 액티브로 한 끼 대체</b>가 가장 빨라요(위 혈당 섹션 참고).</p>';
     h+='</div>';
     h+='</div>';
     h+='<p class="leg" style="text-align:center;margin:16px 18px 8px;line-height:1.7">본 결과는 참고용 영양 정보이며 의학적 진단·치료를 대신하지 않습니다.<br>질환·복용 약이 있다면 전문가와 상담 후 섭취하세요.</p>';
