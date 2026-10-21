@@ -83,6 +83,16 @@ h1#ttl{font-size:23px;font-weight:800;letter-spacing:-.7px;margin:12px 0 6px;lin
 .chipcard .uic{width:78px;height:78px;object-fit:contain}
 .chipcard .cclbl{font-size:13.5px;font-weight:600;color:var(--ink)}
 .chipcard.on .cclbl{color:var(--teal-d)}
+.chips.big .selrow{grid-column:1/-1;display:flex;align-items:center;gap:8px;border:1.5px solid var(--teal);border-radius:14px;background:var(--surface);box-shadow:0 0 0 2.5px rgba(14,124,102,.20),var(--shadow-sm);padding:7px 11px 7px 8px}
+.selrow-tog{display:flex;align-items:center;gap:9px;border:0;background:transparent;cursor:pointer;flex:1;min-width:0;padding:0}
+.selrow-tog .uic{width:48px;height:48px;object-fit:contain;flex:0 0 48px}
+.selrow-tog .oe{font-size:30px;line-height:1}
+.selrow-tog .cclbl{font-size:16px;font-weight:700;color:var(--teal-d)}
+.selrow .selx{color:var(--muted);font-size:13px;margin-left:2px}
+.selrow-amt{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.selrow-amt .amtlbl{font-size:12.5px;color:var(--muted);font-weight:600}
+.selrow-amt .stepper.sm button{width:42px;height:42px;flex:0 0 42px;font-size:20px}
+.selrow-amt .stepper.sm .stval{min-width:52px;padding:10px 6px;font-size:16px}
 .we .uic{width:22px;height:22px;object-fit:contain;vertical-align:-6px}
 .big{width:100%;padding:14px 15px;font-size:16px;border:1.5px solid var(--line);border-radius:13px;background:var(--surface);margin:4px 0;box-shadow:var(--shadow-sm);color:var(--ink)}
 select.big{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2367768A' stroke-width='2.5'><path d='M6 9l6 6 6-6'/></svg>");background-repeat:no-repeat;background-position:right 14px center}
@@ -3424,7 +3434,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V1.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V1.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3793,17 +3803,17 @@ function weekGrid(kind){
   }).join('')+`</div>`;
   if(active>=0){
     const types=kind==='ex'?EXTYPES:ALCTYPES, cell=week[active]||{};
-    h+=`<div class="picker"><div class="pti">${DOW[active]}요일${kind==='alc'?' · 마신 술을 모두 선택':''}</div>`;
+    h+=`<div class="picker"><div class="pti">${DOW[active]}요일${kind==='alc'?' · 마신 술을 모두 선택':''}</div><div class="leg" style="margin:-4px 0 8px">${kind==='ex'?'종류를 누르면 바로 아래에서 시간을 정할 수 있어요.':'마신 술을 누르면 바로 아래에서 잔 수를 정할 수 있어요.'}</div>`;
     if(kind==='ex'){const g=S.sex==='f'?'f':'m';
-      h+=`<div class="chips big">`+types.map(t=>{const on=cell.items&&cell.items.some(it=>it.type===t);return `<button class="chipcard ${on?'on':''}" onclick="setDayType('ex',${active},'${t}')">${uic('ex_'+t+'_'+g)||`<span class="oe">${ic(t)}</span>`}<span class="cclbl">${t}</span></button>`;}).join('')+`</div>`;
+      h+=`<div class="chips big">`+types.map(t=>{const on=cell.items&&cell.items.some(it=>it.type===t);const ico=uic('ex_'+t+'_'+g)||`<span class="oe">${ic(t)}</span>`;
+        if(on)return `<div class="selrow"><button class="selrow-tog" onclick="setDayType('ex',${active},'${t}')">${ico}<span class="cclbl">${t}</span><span class="selx">✕</span></button><div class="selrow-amt"><span class="amtlbl">시간</span>${exMinStepper(active,t)}</div></div>`;
+        return `<button class="chipcard" onclick="setDayType('ex',${active},'${t}')">${ico}<span class="cclbl">${t}</span></button>`;}).join('')+`</div>`;
     }else{
-      h+=`<div class="chips big">`+types.map(t=>{const on=cell.types&&cell.types.includes(t);return `<button class="chipcard ${on?'on':''}" onclick="setDayType('alc',${active},'${t}')">${uic('alc_'+t)||`<span class="oe">${ic(t)}</span>`}<span class="cclbl">${t}</span></button>`;}).join('')+`</div>`;
+      h+=`<div class="chips big">`+types.map(t=>{const on=cell.types&&cell.types.includes(t);const ico=uic('alc_'+t)||`<span class="oe">${ic(t)}</span>`;
+        if(on)return `<div class="selrow"><button class="selrow-tog" onclick="setDayType('alc',${active},'${t}')">${ico}<span class="cclbl">${t}</span><span class="selx">✕</span></button><div class="selrow-amt"><span class="amtlbl">잔</span>${alcCupStepper(active,t)}</div></div>`;
+        return `<button class="chipcard" onclick="setDayType('alc',${active},'${t}')">${ico}<span class="cclbl">${t}</span></button>`;}).join('')+`</div>`;
     }
-    if(cellFilled(kind,cell)){
-      if(kind==='ex'){h+=`<div class="lbl">각 운동 시간 (30분 단위)</div>`;const g=S.sex==='f'?'f':'m';(cell.items||[]).forEach(it=>{h+=`<div style="display:flex;align-items:center;gap:9px;margin:5px 0"><span style="flex:1;font-size:13.5px;color:var(--ink)">${uic('ex_'+it.type+'_'+g)||ic(it.type)} ${it.type}</span>${exMinStepper(active,it.type)}</div>`;});}
-      else h+=`<div class="lbl">총 마신 양 (잔)</div>${stepperDay('alc',active,'cups',1,'잔')}`;
-      h+=`<button class="clr" onclick="clearDay('${kind}',${active})">이 날 지우기</button>`;
-    }
+    if(cellFilled(kind,cell))h+=`<button class="clr" onclick="clearDay('${kind}',${active})">이 날 지우기</button>`;
     h+=`</div>`;
   }
   return h;
@@ -3819,23 +3829,25 @@ function pickDay(kind,i){
     if(S.alcActive===i){S.alcActive=-1;}
     else{S.alcActive=i;
       const empty=!(S.alcWeek[i]&&S.alcWeek[i].types&&S.alcWeek[i].types.length);
-      if(empty&&S.lastAlc&&S.lastAlc.types.length)S.alcWeek[i]={types:[...S.lastAlc.types],cups:S.lastAlc.cups};
+      if(empty&&S.lastAlc&&S.lastAlc.types.length)S.alcWeek[i]={types:[...S.lastAlc.types],cups:S.lastAlc.cups,cupsBy:Object.assign({},S.lastAlc.cupsBy||{})};
     }
   }
   upd();
 }
 function rememberDay(kind,i){
   if(kind==='ex'){const c=S.exWeek[i];if(c&&c.items&&c.items.length)S.lastEx=c.items.map(x=>({type:x.type,min:x.min}));}
-  else{const c=S.alcWeek[i];if(c&&c.types&&c.types.length)S.lastAlc={types:[...c.types],cups:c.cups};}
+  else{const c=S.alcWeek[i];if(c&&c.types&&c.types.length)S.lastAlc={types:[...c.types],cups:c.cups,cupsBy:Object.assign({},c.cupsBy||{})};}
 }
 function setDayType(kind,i,t){const wk=kind==='ex'?S.exWeek:S.alcWeek;
   if(kind==='ex'){if(!wk[i])wk[i]={items:[]};const a=wk[i].items;const j=a.findIndex(x=>x.type===t);j<0?a.push({type:t,min:30}):a.splice(j,1);if(!a.length)wk[i]=null;}
-  else{if(!wk[i])wk[i]={types:[t],cups:1};else{const a=wk[i].types,j=a.indexOf(t);j<0?a.push(t):a.splice(j,1);if(!a.length)wk[i]=null;}}
+  else{if(!wk[i])wk[i]={types:[t],cupsBy:{},cups:1};const c=wk[i];if(!c.cupsBy)c.cupsBy={};const a=c.types,j=a.indexOf(t);
+    if(j<0){a.push(t);c.cupsBy[t]=c.cupsBy[t]||1;}else{a.splice(j,1);delete c.cupsBy[t];}
+    if(!a.length){wk[i]=null;}else{c.cups=Object.keys(c.cupsBy).reduce((x,k)=>x+c.cupsBy[k],0);}}
   rememberDay(kind,i);upd();}
-function stepperDay(kind,i,field,stp,unit){const wk=kind==='ex'?S.exWeek:S.alcWeek;const v=wk[i][field];
-  return `<div class="stepper sm"><button onclick="dayStep('${kind}',${i},'${field}',-${stp})">−</button><div class="stval">${v}${unit}</div><button onclick="dayStep('${kind}',${i},'${field}',${stp})">+</button></div>`;}
 function exMinStepper(i,type){const it=(S.exWeek[i].items||[]).find(x=>x.type===type);const v=it?it.min:30;return `<div class="stepper sm"><button onclick="exItemMin(${i},'${type}',-30)">−</button><div class="stval">${v}분</div><button onclick="exItemMin(${i},'${type}',30)">+</button></div>`;}
 function exItemMin(i,type,d){const it=(S.exWeek[i].items||[]).find(x=>x.type===type);if(it)it.min=Math.max(30,(it.min||30)+d);rememberDay('ex',i);upd();}
+function alcCupStepper(i,type){const c=S.alcWeek[i]||{};const v=(c.cupsBy&&c.cupsBy[type])||1;return `<div class="stepper sm"><button onclick="alcCup(${i},'${type}',-1)">−</button><div class="stval">${v}잔</div><button onclick="alcCup(${i},'${type}',1)">+</button></div>`;}
+function alcCup(i,type,d){const c=S.alcWeek[i];if(!c)return;if(!c.cupsBy)c.cupsBy={};c.cupsBy[type]=Math.max(1,(c.cupsBy[type]||1)+d);c.cups=Object.keys(c.cupsBy).reduce((x,k)=>x+c.cupsBy[k],0);rememberDay('alc',i);upd();}
 function dayStep(kind,i,field,delta){const wk=kind==='ex'?S.exWeek:S.alcWeek;wk[i][field]=Math.max(field==='min'?30:1,(wk[i][field]||0)+delta);rememberDay(kind,i);upd();}
 function clearDay(kind,i){const wk=kind==='ex'?S.exWeek:S.alcWeek;wk[i]=null;if(kind==='ex')S.exActive=-1;else S.alcActive=-1;upd();}
 
@@ -4246,34 +4258,31 @@ function mhpColor(v,macro){
  if(v<40)return '#E5484D';if(v<60)return '#F5820B';if(v<80)return '#E0B000';return '#1FA971';
 }
 // 애니메이션 막대 (섭취전/후 토글, 오른쪽으로 자람). macro는 200% 스케일+100% 중앙선
+// 막대 = 섭취전(색=부족도, 고정) + 초록 연장(유사나로 채워지는 양, 애니메이션으로 자람)
 function mhpBar3(name,before,after,macro){
- before=Math.round(before); after=Math.round(after); var scale=macro?200:100;
- return '<div class="babar" data-b="'+before+'" data-a="'+after+'" data-macro="'+(macro?1:0)+'" style="margin:11px 0">'
-  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span class="baval" style="font-size:14px;font-weight:800;color:'+mhpColor(before,macro)+'">'+before+'%</span></div>'
-  +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:2"></div>':'')
-  +'<i class="bafill" style="display:block;height:100%;width:'+Math.min(100,before/scale*100)+'%;background:'+mhpColor(before,macro)+';border-radius:99px;transition:width .9s cubic-bezier(.25,0,.2,1),background .5s"></i></div></div>';
+ before=Math.round(before); after=Math.round(Math.max(before,after)); var scale=macro?200:100;
+ var bw=Math.min(100,before/scale*100), ew=Math.max(0,Math.min(100-bw,(after-before)/scale*100)), ext=after-before;
+ return '<div class="babar" style="margin:11px 0">'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span style="font-size:13.5px;font-weight:800"><span style="color:'+mhpColor(before,macro)+'">'+before+'%</span>'+(ext>0?'<span style="color:#1FA971"> → '+after+'%</span>':'')+'</span></div>'
+  +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>':'')
+  +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+mhpColor(before,macro)+'"></div>'
+  +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:#1FA971;transition:width .9s cubic-bezier(.25,0,.2,1)"></i>'
+  +'</div></div>';
 }
-function mhpSetGraph(mode){
- try{document.querySelectorAll('#result .babar').forEach(function(el){
-   var b=+el.dataset.b,a=+el.dataset.a,macro=el.dataset.macro==='1',scale=macro?200:100;
-   var v=(mode==='after'?a:b), fill=el.querySelector('.bafill'), val=el.querySelector('.baval');
-   if(fill){fill.style.width=Math.min(100,v/scale*100)+'%';fill.style.background=mhpColor(v,macro);}
-   if(val){val.textContent=v+'%';val.style.color=mhpColor(v,macro);}
- });
- var on='flex:1;padding:12px;border:none;border-radius:11px;font-weight:800;font-size:14.5px;cursor:pointer;background:var(--teal);color:#fff',
-     off='flex:1;padding:12px;border:1.5px solid var(--line);border-radius:11px;font-weight:800;font-size:14.5px;cursor:pointer;background:#fff;color:var(--muted)';
- var bb=document.getElementById('baBtnB'),ba=document.getElementById('baBtnA');
- if(bb)bb.style.cssText=(mode==='before'?on:off); if(ba)ba.style.cssText=(mode==='after'?on:off);
- }catch(e){}
-}
-function mhpAnimGraph(){ mhpSetGraph('before'); setTimeout(function(){mhpSetGraph('after');},550); setTimeout(mhpAnimGI,350); }
+function mhpAnimGraph(){ setTimeout(function(){document.querySelectorAll('#result .baext').forEach(function(el){el.style.width=el.dataset.ew+'%';});},450); setTimeout(mhpAnimGI,350); }
+function mhpReplayGraph(){ document.querySelectorAll('#result .baext').forEach(function(el){el.style.width='0%';}); setTimeout(function(){document.querySelectorAll('#result .baext').forEach(function(el){el.style.width=el.dataset.ew+'%';});},70); }
 var _mhpGi=50;
 function mhpAnimGI(){
- var nd=document.getElementById('giNeedle'), nv=document.getElementById('giNowVal'), lm=document.getElementById('giLowMark');
- if(!nd)return; nd.style.left='0%';
- setTimeout(function(){nd.style.left=Math.min(100,_mhpGi)+'%';},80);
+ var mk=document.getElementById('giMask'), nv=document.getElementById('giNowVal');
+ if(!mk)return; mk.style.left='100%'; if(nv)nv.textContent='0';
+ setTimeout(function(){mk.style.left=Math.min(100,_mhpGi)+'%';},90);
  var c=0,t=setInterval(function(){c+=Math.max(1,Math.round(_mhpGi/25));if(c>=_mhpGi){c=_mhpGi;clearInterval(t);}if(nv)nv.textContent=c;},34);
- if(lm)setTimeout(function(){lm.style.opacity='1';},1300);
+}
+function mhpGiSub(){ // 뉴트리밀 대체 시 GI가 떨어지는 애니메이션
+ var mk=document.getElementById('giMask'), nv=document.getElementById('giNowVal'), lm=document.getElementById('giLowMark');
+ if(!mk)return; mk.style.left='18%';
+ var c=_mhpGi,t=setInterval(function(){c-=Math.max(1,Math.round(_mhpGi/22));if(c<=18){c=18;clearInterval(t);}if(nv)nv.textContent=c;},34);
+ if(lm)lm.style.opacity='1';
 }
 function showMHP(){
   try{
@@ -4293,26 +4302,27 @@ function showMHP(){
     var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000;
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
     var mProt=p100(M?M.prot:0,wkg*1.0), mFib=p100(M?M.fiber:0,27), mCarb=Math.min(200,p100(M?M.carb:0,tdee*0.55/4)), mFat=Math.min(200,p100(M?M.fat:0,tdee*0.28/9));
-    var macros=[{n:'단백질',b:Math.min(200,mProt),a:Math.min(200,mProt+(macroAdd.protein||0))},{n:'탄수화물',b:mCarb,a:mCarb},{n:'지방',b:mFat,a:mFat},{n:'식이섬유',b:Math.min(200,mFib),a:Math.min(200,mFib+(macroAdd.fiber||0))}];
+    var macros=[{n:'단백질',b:Math.min(200,mProt),a:mProt<100?Math.min(100,mProt+(macroAdd.protein||0)):Math.min(200,mProt)},{n:'탄수화물',b:mCarb,a:mCarb},{n:'지방',b:mFat,a:mFat},{n:'식이섬유',b:Math.min(200,mFib),a:mFib<100?Math.min(100,mFib+(macroAdd.fiber||0)):Math.min(200,mFib)}];
     var fishSig=0; try{(S.basket||[]).concat(S.nightBasket||[]).forEach(function(nm){if(/생선|고등어|연어|참치|회|조림|멸치|꽁치|삼치/.test(nm))fishSig++;});}catch(e){}
     var efaB=Math.max(15,Math.min(70,22+fishSig*14)), coqB=Math.max(35,Math.min(90,Math.round(90-Math.max(0,age-30)*1.3)));
     var others=[{n:'필수지방산(오메가3)',b:efaB,a:exSet.omega3?98:efaB},{n:'코엔자임Q10',b:coqB,a:exSet.coq10?92:coqB}];
     var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:15.5px;margin:17px 0 6px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
-    h+='<div style="display:flex;gap:8px;margin:6px 0 6px"><button id="baBtnB" onclick="mhpSetGraph(\'before\')">섭취 전(현재)</button><button id="baBtnA" onclick="mhpSetGraph(\'after\')">유사나 섭취 후</button></div>';
-    h+='<p class="leg" style="margin:0 0 2px">색: <b style="color:#E5484D">40%↓ 빨강</b> · <b style="color:#F5820B">60%↓ 주황</b> · <b style="color:#E0B000">80%↓ 노랑</b> · <b style="color:#1FA971">80%↑ 녹색</b></p>';
+    h+='<p class="leg" style="margin:0 0 4px"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#AEBAC4;vertical-align:-1px"></span> 섭취 전(색=부족도: 빨강<주황<노랑<녹색) &nbsp;<span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:#1FA971;vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
+    h+='<div style="margin:2px 0 0"><button onclick="mhpReplayGraph()" style="padding:8px 14px;border:1.5px solid var(--line);background:#fff;color:var(--teal-d);border-radius:10px;font-weight:700;font-size:13px;cursor:pointer">▶ 채워지는 애니메이션 다시 보기</button></div>';
     h+=baGroup('미량영양소 · 비타민',vits,false);
     h+=baGroup('미량영양소 · 미네랄',mins,false);
     h+=baGroup('필수지방산 · 코엔자임Q10',others,false);
     h+=baGroup('대량영양소 (0~200%, 100%가 적정)',macros,true);
     h+='<p class="leg" style="margin-top:6px;line-height:1.7">※ 대량영양소는 <b>부족도 과다도 문제</b>라 100%가 적정(120%↑ 주황·140%↑ 빨강). 유사나는 미량·필수지방산·CoQ10의 빈자리를 메워 줍니다.</p>';
-    // GI 게이지
+    // GI 게이지 (채워지는 방식 + 10~30녹/30~55연두/55~65노랑/65~75주황/75~100빨강)
     var gi=Math.round((M&&M.giAvg)?M.giAvg:50); _mhpGi=gi;
     h+='<div style="font-weight:800;font-size:15.5px;margin:20px 0 8px;color:#2C3B33">혈당지수(GI) — 식사가 혈당 올리는 속도</div>';
-    h+='<div style="position:relative;height:22px;border-radius:99px;background:linear-gradient(90deg,#1FA971 0 55%,#E0B000 55% 70%,#E5484D 70% 100%)"><div id="giNeedle" style="position:absolute;left:0%;top:-4px;bottom:-4px;width:4px;background:#17364f;border-radius:2px;box-shadow:0 0 0 2px #fff;transition:left 1.1s cubic-bezier(.3,0,.2,1)"></div></div>';
-    h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px"><span>낮음(좋음) 0</span><span>55</span><span>70</span><span>높음 100</span></div>';
-    h+='<div style="text-align:center;margin-top:8px;font-weight:800;font-size:16px">현재 식사 GI <span id="giNowVal" style="color:#17364f;font-size:20px">0</span></div>';
-    h+='<div id="giLowMark" style="opacity:0;transition:opacity .7s;margin-top:10px;background:#E3F4F6;border-radius:11px;padding:12px 14px;text-align:center"><b style="color:#13889A">한 끼를 뉴트리밀로 대체하면 GI ≈ 18 ↓</b><div class="leg" style="margin-top:3px">저GI 조제식이라 혈당을 천천히 올려 체중·혈당 관리에 유리해요</div></div>';
+    h+='<div style="position:relative;height:24px;border-radius:99px;overflow:hidden;background:linear-gradient(90deg,#1FA971 0 30%,#86C94A 30% 55%,#E0B000 55% 65%,#F5820B 65% 75%,#E5484D 75% 100%)"><div id="giMask" style="position:absolute;top:0;bottom:0;left:100%;right:0;background:#EEF2F0;transition:left 1.1s cubic-bezier(.3,0,.2,1)"></div></div>';
+    h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px"><span>좋음 10</span><span>30</span><span>55</span><span>75</span><span>높음 100</span></div>';
+    h+='<div style="text-align:center;margin-top:8px;font-weight:800;font-size:16px">현재 식사 GI <span id="giNowVal" style="color:#17364f;font-size:21px">0</span></div>';
+    h+='<div style="text-align:center;margin-top:8px"><button id="giSubBtn" onclick="mhpGiSub()" style="padding:10px 18px;border:1.5px solid var(--teal);background:#fff;color:var(--teal-d);border-radius:11px;font-weight:800;font-size:13.5px;cursor:pointer">🥤 뉴트리밀로 한 끼 대체하면?</button></div>';
+    h+='<div id="giLowMark" style="opacity:0;transition:opacity .6s;margin-top:10px;background:#E3F4F6;border-radius:11px;padding:12px 14px;text-align:center"><b style="color:#13889A">GI가 ≈ 18로 뚝 떨어져요 ↓</b><div class="leg" style="margin-top:3px">저GI 조제식이라 혈당을 천천히 올려 체중·혈당 관리에 유리해요</div></div>';
     h+='</div>';
 
     /* ===== 03 1순위 추천 (사장님 매핑) ===== */
@@ -4326,18 +4336,28 @@ function showMHP(){
     else if(items.some(function(it){return it.kind==='pack'&&it.premium===false;}))h+='<p class="leg" style="margin-top:10px;background:#F4F8F6;border-radius:10px;padding:10px 12px">💡 옵티마이저 팩은 종합영양이 들어있지 않아 <b>헬스팩을 1번으로 함께</b> 챙기는 걸 권해요.</p>';
     h+='</div>';
 
-    /* 추가로 챙기면 좋아요 (관심사 기반) */
-    var used={}; items.forEach(function(it){used[it.name]=1;});
-    var pool=[],L=rec.labels;
-    if(L.indexOf('변비')>=0||L.indexOf('위장')>=0)pool.push('화이버지 플러스','프로바이오틱');
-    if(L.indexOf('갱년기')>=0)pool.push('이소플라본 플러스');
-    if(L.indexOf('눈 건강')>=0)pool.push('비전엑스 디에스');
-    if(L.indexOf('면역')>=0)pool.push('부스터 C600','프로바이오틱');
-    if(L.indexOf('기억력')>=0||L.indexOf('피로')>=0)pool.push('코큐논 30');
-    if(L.indexOf('피부')>=0||L.indexOf('동안')>=0)pool.push('프로후라바놀 C300');
-    if(L.indexOf('탈모')>=0)pool.push('비타민B군·비오틴');
-    var seen={},adds=[]; pool.forEach(function(n){if(!used[n]&&!seen[n]){seen[n]=1;adds.push(n);}}); adds=adds.slice(0,4);
-    if(adds.length){h+='<div class="sec"><h3><span class="n">04</span> 추가로 챙기면 좋아요</h3>';adds.forEach(function(n,i){h+='<div style="display:flex;gap:12px;align-items:center;padding:11px 0;'+(i>0?'border-top:1px solid var(--line,#eef2f0)':'')+'"><div style="flex:0 0 36px;height:36px;border-radius:10px;background:#E3F4F6;color:#13889A;font-weight:800;display:flex;align-items:center;justify-content:center">'+(i+1)+'</div><div style="flex:1;font-weight:700;font-size:16px">'+n+'</div></div>';});h+='</div>';}
+    /* 추천 순위 이어서 — 무조건 10위까지, 번호는 1순위에서 연속 */
+    var startRank=items.length; var used={}; items.forEach(function(it){used[it.name]=1;});
+    var ADDPOOL=[
+     /* 범용성 높은 순 → 틈새 순 (동점이면 이 순서가 유지됨) */
+     {n:'프로바이오틱',c:['변비','위장','면역','피부']},{n:'바이오메가',c:['혈중지질','눈 건강','기억력','피부','혈압']},
+     {n:'프로후라바놀 C300',c:['면역','동안','피부','혈압']},{n:'폴리C',c:['면역','피부']},
+     {n:'코큐논 30',c:['혈압','기억력','피로','동안']},{n:'비타민D',c:['면역','뼈·관절']},
+     {n:'화이버지 플러스',c:['변비','위장','체중']},{n:'e프라임',c:['동안','피부']},
+     {n:'부스터 C600',c:['면역']},{n:'마그네칼 D',c:['뼈·관절','수면','갱년기']},
+     {n:'FOS 액티브',c:['변비','위장']},{n:'유기농 곡물 효소',c:['위장']},{n:'프로글루카뮨',c:['면역']},
+     {n:'프로코사 글루코사민',c:['뼈·관절']},{n:'비전엑스 디에스',c:['눈 건강']},{n:'헤파실 플러스',c:['간']},
+     {n:'이소플라본 플러스',c:['갱년기'],fem:true},
+     {n:'피지 에너지 드링크',c:['피로']},{n:'코어 아미노 드링크',c:['피로']},{n:'액티브 미네랄 드링크',c:['피로']}
+    ];
+    var L=rec.labels;
+    var scored=ADDPOOL.filter(function(p){return !used[p.n]&&!(p.fem&&v.sex!=='f');}).map(function(p){var s=0;p.c.forEach(function(c){if(L.indexOf(c)>=0)s++;});return {n:p.n,s:s};});
+    scored.sort(function(a,b){return b.s-a.s;});
+    var extra=[]; scored.forEach(function(x){if((startRank+extra.length)>=10||used[x.n])return;used[x.n]=1;extra.push(x.n);});
+    ['헬스팩','바이오메가','프로바이오틱','프로후라바놀 C300','폴리C','비타민D','e프라임','헤파실 플러스'].forEach(function(n){if((startRank+extra.length)>=10||used[n])return;used[n]=1;extra.push(n);});
+    if(extra.length){h+='<div class="sec"><h3><span class="n">▾</span> 추가로 챙기면 좋아요 <span style="font-weight:400;font-size:12.5px;color:var(--muted)">('+(startRank+1)+'~'+(startRank+extra.length)+'위)</span></h3>';
+      extra.forEach(function(n,i){h+='<div style="display:flex;gap:12px;align-items:center;padding:11px 0;'+(i>0?'border-top:1px solid var(--line,#eef2f0)':'')+'"><div style="flex:0 0 36px;height:36px;border-radius:10px;background:#E3F4F6;color:#13889A;font-weight:800;display:flex;align-items:center;justify-content:center">'+(startRank+i+1)+'</div><div style="flex:1;font-weight:700;font-size:16px">'+n+'</div></div>';});
+      h+='</div>';}
     h+='</div>';
     h+='<p class="leg" style="text-align:center;margin:16px 18px 8px;line-height:1.7">본 결과는 참고용 영양 정보이며 의학적 진단·치료를 대신하지 않습니다.<br>질환·복용 약이 있다면 전문가와 상담 후 섭취하세요.</p>';
     h+='<div style="margin:6px 18px 10px"><button class="navbtn" style="width:100%" onclick="editDetail()">◂ 답변 수정하기</button></div>';
