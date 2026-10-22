@@ -422,8 +422,9 @@ h1#ttl{font-size:31px!important;line-height:1.28!important}
 .ck.master b{font-size:20px!important}
 .navbtn{font-size:21px!important}
 .link{font-size:17px!important}
-.sec h3{font-size:20px!important}
-.leg{font-size:16.5px!important}
+.sec h3{font-size:23px!important}
+.leg{font-size:19px!important}
+.reportwrap .leg{font-size:19px!important;line-height:1.65!important}
 .reassure{font-size:17px!important}
 .herotag{font-size:18px!important}
 .rhero-tt{font-size:29px!important}
@@ -3066,7 +3067,12 @@ function compute(v){
     if(v.abdomen===2)ap(MULT.abNotice);if(v.abdomen===3)ap(MULT.abSevere);if(v.stress>=2)ap(MULT.stressHigh);
     if(v.age>=80)ap(MULT.age80);else if(v.age>=70)ap(MULT.age70);else if(v.age>=60)ap(MULT.age60);else if(v.age>=50)ap(MULT.age50);else if(v.age>=40)ap(MULT.age40);
     let aODI=Math.max(n.odi*(1+0.5*(sf-1)),n.rda),req=Math.min(aODI*m,n.dl*sf);
-    let dietIntake; if(n.k==='칼슘')dietIntake=150+(v.caFood||0)+(v.caBev||0); else if(n.k==='마그네슘')dietIntake=85+(v.mgFood||0)+(v.mgBev||0); else dietIntake=n.df*dietQ*n.odi;   // 마그네슘 식사기여 하향(결핍 흔함)
+    // 식사 섭취량(섭취 전): 일반 식단 ≈ RDA의 1.15배로 보고 ODI(최적) 대비 %로 환산. ODI가 RDA보다 훨씬 높은 영양소(비타민C·E·B군·D 등 USANA 메가도즈)는 식사로 자연히 낮게, 식품에 흔한 영양소(철·망간·요오드 등)는 높게 나옴. 칼슘·마그네슘은 실제 식사·음료 함량 기반.
+    let dietIntake;
+    if(n.k==='칼슘')dietIntake=80+(v.caFood||0)+(v.caBev||0);
+    else if(n.k==='마그네슘')dietIntake=30+(v.mgFood||0)+(v.mgBev||0);
+    else if(n.k==='비타민D')dietIntake=0.22*n.rda*dietQ;   // 비타민D는 식품 기여 극소량(대부분 햇빛)
+    else dietIntake=1.15*n.rda*dietQ;
     const mvCov=n.mvGood*starCov(mvStar), suppIntake=mvCov*n.odi;
     const pctDiet=Math.round(dietIntake/req*100*(1-(v.foodFortFrac||0)))+fortPct, pctSupp=Math.round(suppIntake/req*100);
     const pctSuppMax=Math.round(n.mvGood*STAR[(v.codiStar!=null?Math.round(v.codiStar):5)]*n.odi/req*100);   // '코디 시' 열 = 권장 등급(codiStar) 기준
@@ -3435,10 +3441,10 @@ const ALCTYPES=['맥주','소주','소맥','막걸리','와인','하이볼','사
 
 const S={consent:{service:false,statistics:false,sensitive:false},showTerms:false,sex:null,_bodyEdited:false,birthYear:1988,birthdayPassed:true,
  height:170,weight:70,abdomen:null,thigh:null,
- meals:[{},{},{},{}],mealAmt:['1','1','1','1'],mealSkip:[false,false,false,false],mealPhase:[0,0,0,0],nightFreq:0,mealTab:['간편식','한식','한식','야식'],basket:[],nightBasket:[],dailyAmt:null,basketTab:'한식',mealsPerDay:null,
+ meals:[{},{},{},{}],mealAmt:['1','1','1','1'],mealSkip:[false,false,false,false],mealPhase:[0,0,0,0],nightFreq:0,mealTab:['간편식','한식','한식','야식'],basket:[],nightBasket:[],dailyAmt:null,basketTab:'한식',mealsPerDay:3,
  firstMealTime:8,lastMealTime:19,
  veg:3,fruit:3,snack:2,
- bev:{물:4,커피:1,차:0,우유:0,요거트:0,두유:0,탄산음료:0,주스:0,스포츠음료:0,에너지음료:0},
+ bev:{물:3,커피:0,차:0,우유:0,요거트:0,두유:0,탄산음료:0,주스:0,스포츠음료:0,에너지음료:0},
  sleepReg:'reg',sleepBed:23,sleepWake:7,sleepHours:7,sleepFeel:3,wakeOften:0,napHours:0,
  sunOut:'am',sunAmt:'mid',
  exWeek:[null,null,null,null,null,null,null],exActive:-1,
@@ -3448,7 +3454,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V2.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V2.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4294,7 +4300,7 @@ function mhpBar3(name,before,after,macro){
  before=Math.round(before); after=Math.round(Math.max(before,after)); var scale=macro?200:100;
  var bw=Math.min(100,before/scale*100), ew=Math.max(0,Math.min(100-bw,(after-before)/scale*100)), ext=after-before;
  return '<div class="babar" style="margin:11px 0">'
-  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span class="bapct" style="font-size:13.5px;font-weight:800"><span style="color:'+mhpColor(before,macro)+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="bapct" style="font-size:17px;font-weight:800"><span style="color:'+mhpColor(before,macro)+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
   +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>':'')
   +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+mhpColor(before,macro)+';border-radius:99px;z-index:2;box-shadow:'+(ext>0?'2.5px 0 0 0 #eef2f0':'none')+'"></div>'
   +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:'+MHP_FILL+';border-radius:99px;transition:width .85s cubic-bezier(.25,0,.2,1)"></i>'
@@ -4323,7 +4329,7 @@ function mhpMacroBar(name,mealV,nutriV){
  mealV=Math.round(mealV); nutriV=Math.round(nutriV);
  var mw=Math.min(100,mealV/200*100);
  return '<div class="mbar" data-meal="'+mealV+'" data-nutri="'+nutriV+'" style="margin:11px 0">'
-  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:15.5px">'+name+'</span><span class="mbarpct" style="font-size:13.5px;font-weight:800;color:'+mhpColor(mealV,true)+'">'+mealV+'%</span></div>'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="mbarpct" style="font-size:17px;font-weight:800;color:'+mhpColor(mealV,true)+'">'+mealV+'%</span></div>'
   +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden"><div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>'
   +'<i class="mbarfill" style="position:absolute;left:0;top:0;bottom:0;width:'+mw+'%;background:'+mhpColor(mealV,true)+';border-radius:99px;transition:width .7s cubic-bezier(.25,0,.2,1),background .4s"></i>'
   +'</div></div>';
@@ -4375,8 +4381,8 @@ function mhpRankRow(rank,name,price,line1,line2,noTop){
   :('<div style="flex:0 0 60px;height:60px;border-radius:13px;background:#E9EEF8;color:#1E3A6B;font-weight:800;font-size:19px;display:flex;align-items:center;justify-content:center">'+rank+'</div>');
  return '<div style="display:flex;gap:12px;align-items:center;padding:11px 0;'+((rank>1&&!noTop)?'border-top:1px solid var(--line,#eef2f0)':'')+'">'
   +badge
-  +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:16.5px">'+name+(price?' <span style="font-size:12.5px;font-weight:600;color:var(--muted)">'+price+'</span>':'')+'</div>'
-  +'<div class="leg" style="margin-top:2px">'+line1+'</div>'+(line2?'<div style="font-size:11.5px;color:var(--muted);margin-top:2px">구성: '+line2+'</div>':'')+'</div>'
+  +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:20px">'+name+(price?' <span style="font-size:14px;font-weight:600;color:var(--muted)">'+price+'</span>':'')+'</div>'
+  +'<div class="leg" style="margin-top:2px">'+line1+'</div>'+(line2?'<div style="font-size:14.5px;color:var(--muted);margin-top:3px">구성: '+line2+'</div>':'')+'</div>'
   +'<button class="pickbtn'+(checked?' on':'')+'" onclick="mhpTogPick(this.dataset.n,this)" data-n="'+name.replace(/"/g,'&quot;')+'"><svg viewBox="0 0 24 24" width="21" height="21"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
   +'</div>';
 }
@@ -4408,16 +4414,16 @@ function mhpLifestyle(v,r){
  if(fired.length){
   h+='<div class="sec"><h3><span class="n">💪</span> 생활습관 개선 제안</h3>';
   h+='<p class="leg" style="margin:-2px 0 10px">영양제와 <b>함께</b> 아래 습관을 바꾸면 효과가 훨씬 커져요.</p>';
-  fired.forEach(function(k,i){h+='<div class="goal" style="align-items:flex-start;margin-bottom:9px"><span class="gi">'+(i+1)+'</span><div><b style="font-size:14.5px">'+(GOAL[k]||k)+'</b>'+(STIP[k]?'<div style="font-size:12.5px;color:#5B6B75;margin-top:3px;line-height:1.6">'+STIP[k]+'</div>':'')+'</div></div>';});
+  fired.forEach(function(k,i){h+='<div class="goal" style="align-items:flex-start;margin-bottom:10px"><span class="gi">'+(i+1)+'</span><div><b style="font-size:18px">'+(GOAL[k]||k)+'</b>'+(STIP[k]?'<div style="font-size:15.5px;color:#5B6B75;margin-top:4px;line-height:1.6">'+STIP[k]+'</div>':'')+'</div></div>';});
   h+='</div>';
  }
  var ints=(v.interests||[]), cards='';
  ints.forEach(function(key){var D=INTEREST_DEEP[key]||LSX[key]; if(!D)return;
-  cards+='<div style="background:#eef6f1;border-left:4px solid #17A6B8;border-radius:8px;padding:13px 15px;margin-bottom:10px">';
-  cards+='<div style="font-weight:800;font-size:14.5px;color:#0E7C66;margin-bottom:6px">'+mhpLabel(key)+'</div>';
-  if(D.why)cards+='<p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 9px">'+D.why+'</p>';
-  if(D.exercise)cards+='<div style="font-size:12.5px;line-height:1.7;margin-bottom:8px"><b style="color:#0E7C66">🏃 운동</b><br>'+D.exercise+'</div>';
-  if(D.lifestyle)cards+='<div style="font-size:12.5px;line-height:1.7"><b style="color:#0E7C66">🌱 생활습관</b><br>'+D.lifestyle+'</div>';
+  cards+='<div style="background:#eef6f1;border-left:5px solid #17A6B8;border-radius:10px;padding:15px 17px;margin-bottom:12px">';
+  cards+='<div style="font-weight:800;font-size:18px;color:#0E7C66;margin-bottom:8px">'+mhpLabel(key)+'</div>';
+  if(D.why)cards+='<p style="font-size:16px;color:#444;line-height:1.7;margin:0 0 11px">'+D.why+'</p>';
+  if(D.exercise)cards+='<div style="font-size:16px;line-height:1.7;margin-bottom:10px"><b style="color:#0E7C66">🏃 운동</b><br>'+D.exercise+'</div>';
+  if(D.lifestyle)cards+='<div style="font-size:16px;line-height:1.7"><b style="color:#0E7C66">🌱 생활습관</b><br>'+D.lifestyle+'</div>';
   cards+='</div>';
  });
  if(cards)h+='<div class="sec"><h3><span class="n">🎯</span> 관심분야 케어</h3>'+cards+'</div>';
@@ -4482,7 +4488,7 @@ function showMHP(){
     var efaB=Math.max(15,Math.min(70,22+fishSig*14)), coqB=Math.max(22,Math.min(60,Math.round(60-Math.max(0,age-30)*1.0)));   // CoQ10=체내합성+소량식품, 나이들수록↓
     mins.push({n:'필수지방산(오메가3)',b:efaB,a:exSet.omega3?98:efaB});
     mins.push({n:'코엔자임Q10',b:coqB,a:exSet.coq10?92:coqB});
-    var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:15.5px;margin:17px 0 6px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
+    var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:19px;margin:17px 0 7px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
     /* --- 02 미량영양소 (섭취 전/후) --- */
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
     h+='<p class="leg" style="margin:0 0 7px">막대 색 = 지금 충족도 (<span style="color:#F0503F;font-weight:800">부족</span> → <span style="color:#17A6B8;font-weight:800">충분</span>) &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
@@ -4492,24 +4498,27 @@ function showMHP(){
     /* --- 03 대량영양소 & 혈당 (식사 ↔ 뉴트리밀 토글) --- */
     var gi=Math.round((M&&M.giAvg)?M.giAvg:50); _mhpGi=gi;
     h+='<div class="sec"><h3><span class="n">03</span> 대량영양소 &amp; 혈당</h3>';
-    h+='<p class="leg" style="margin:-2px 0 9px">한 끼를 저GI 조제식 <b>뉴트리밀</b>로 바꾸면 이렇게 변해요. 늘어나는 것도, 줄어드는 것도 있어요.</p>';
+    h+='<p class="leg" style="margin:-2px 0 9px">한 끼를 저GI 건강식 <b>뉴트리밀</b>로 바꾸면 이렇게 변해요.</p>';
     h+='<div class="segbtns"><button id="mbMeal" class="segbtn on" onclick="mhpMacroMode(\'meal\')">식사 시</button><button id="mbNutri" class="segbtn" onclick="mhpMacroMode(\'nutri\')">🥤 뉴트리밀 섭취 시</button></div>';
-    h+='<div style="font-weight:800;font-size:15.5px;margin:15px 0 6px;color:#2C3B33">대량영양소 <span style="font-weight:400;font-size:12px;color:var(--muted)">(100%가 적정)</span></div>';
+    h+='<div style="font-weight:800;font-size:19px;margin:16px 0 7px;color:#2C3B33">대량영양소 <span style="font-weight:400;font-size:14px;color:var(--muted)">(100%가 적정)</span></div>';
     h+=mhpMacroBar('단백질',mProt,nProt)+mhpMacroBar('탄수화물',mCarb,nCarb)+mhpMacroBar('지방',mFat,nFat)+mhpMacroBar('식이섬유',mFib,nFib);
-    h+='<div style="font-weight:800;font-size:15.5px;margin:20px 0 8px;color:#2C3B33">혈당지수(GI) — 식사가 혈당 올리는 속도</div>';
+    h+='<div style="font-weight:800;font-size:19px;margin:20px 0 8px;color:#2C3B33">혈당지수(GI) — 식사가 혈당 올리는 속도</div>';
     h+='<svg viewBox="0 0 320 84" preserveAspectRatio="none" style="width:100%;height:82px;display:block"><defs><linearGradient id="giGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5E9E3E"/><stop offset=".30" stop-color="#86C94A"/><stop offset=".55" stop-color="#E0B000"/><stop offset=".75" stop-color="#F5820B"/><stop offset="1" stop-color="#F0503F"/></linearGradient><clipPath id="giClip"><rect id="giClipR" x="4" y="0" width="0" height="84"/></clipPath></defs><path d="M4,80 L316,80 L316,8 Z" fill="#E8ECEA"/><path d="M4,80 L316,80 L316,8 Z" fill="url(#giGrad)" clip-path="url(#giClip)"/></svg>';
-    h+='<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:2px"><span>좋음 10</span><span>30</span><span>55</span><span>75</span><span>높음 100</span></div>';
-    h+='<div style="text-align:center;margin-top:12px"><span id="giLabel" style="font-size:30px;font-weight:900;letter-spacing:-.01em">—</span></div>';
-    h+='<div style="text-align:center;margin-top:3px"><span style="font-weight:700;font-size:14px;color:var(--muted)">예상 GI </span><span id="giNowVal" style="color:#17364f;font-size:19px;font-weight:800">0</span></div>';
-    h+='<div id="giLowMark" style="opacity:0;transition:opacity .6s;margin-top:10px;background:#E3F4F6;border-radius:11px;padding:12px 14px;text-align:center"><b style="color:#13889A">뉴트리밀로 대체하면 GI가 ≈ 18로 뚝 떨어져요 ↓</b><div class="leg" style="margin-top:3px">저GI 조제식이라 혈당을 천천히 올려 체중·혈당 관리에 유리해요</div></div>';
+    h+='<div style="display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-top:3px"><span>좋음 10</span><span>30</span><span>55</span><span>75</span><span>높음 100</span></div>';
+    h+='<div style="text-align:center;margin-top:12px"><span id="giLabel" style="font-size:38px;font-weight:900;letter-spacing:-.01em">—</span></div>';
+    h+='<div style="text-align:center;margin-top:3px"><span style="font-weight:700;font-size:16px;color:var(--muted)">예상 GI </span><span id="giNowVal" style="color:#17364f;font-size:23px;font-weight:800">0</span></div>';
+    h+='<div id="giLowMark" style="opacity:0;transition:opacity .6s;margin-top:10px;background:#E3F4F6;border-radius:11px;padding:12px 14px;text-align:center"><b style="color:#13889A">뉴트리밀로 대체하면 GI가 ≈ 18로 뚝 떨어져요 ↓</b><div class="leg" style="margin-top:3px">저GI 건강식이라 혈당을 천천히 올려 체중·혈당 관리에 유리해요</div></div>';
     h+='</div>';
 
     /* ===== 나에게 맞는 유사나 뉴트리션 제품 순위 (중요도 tier로 내부 정렬만, 헤더 미표시) ===== */
     var rankList=[];
     items.forEach(function(it){rankList.push({name:it.name,l1:(it.func||it.desc||''),l2:it.desc||''});});
     extra.forEach(function(x){rankList.push({name:x.n,l1:(RBLURB[x.n]||'부족한 영양 보완'),l2:''});});
+    // 뉴트리밀은 혈당·대량영양소 개선의 핵심이라 항상 상위 추천(없으면 맨 앞에 추가 → tier1 중에서도 선두)
+    if(!rankList.some(function(r){return r.name==='뉴트리밀 액티브';}))rankList.unshift({name:'뉴트리밀 액티브',l1:'저GI·고단백 건강식으로 혈당·체중 관리에 도움',l2:''});
     rankList.forEach(function(r){r.tier=mhpTier(r.name,v);});
-    rankList.sort(function(a,b){return a.tier-b.tier;});   // 중요도 순(내부용)
+    rankList.sort(function(a,b){return a.tier-b.tier;});   // 중요도 순(내부용, 동급은 순서 유지)
+    rankList=rankList.slice(0,10);
     S.mhpPick={}; rankList.forEach(function(r,i){S.mhpPick[r.name]=(i<5);});
     h+='<div class="sec"><h3><span class="n">🎯</span> 나에게 맞는 유사나 뉴트리션 제품 순위</h3>';
     rankList.forEach(function(r,i){h+=mhpRankRow(i+1,r.name,'',r.l1,r.l2,false);});
@@ -4595,7 +4604,7 @@ function showResult(){
   }
   $('survey').style.display='none';$('result').style.display='block';$('navbar').style.display='none';var _tb=document.querySelector('.topbar');if(_tb)_tb.style.display='none';window.scrollTo(0,0);
 }
-function restart(){step=0;S.mode='detail';S.simple={};S.riceType='흰쌀밥';S.name='';S.interests=[];S.exWeek=[null,null,null,null,null,null,null];S.alcWeek=[null,null,null,null,null,null,null];S.sleepReg='reg';S.sleepBed=23;S.sleepWake=7;S.sleepHours=7;S.sleepFeel=3;S.wakeOften=0;S.napHours=0;S.sex=null;S._bodyEdited=false;S.height=170;S.weight=70;S.abdomen=null;S.thigh=null;S.mvStar=0;S.mvHas=null;S.mvPrice=null;S.mvName='';S.curStar=null;S.codiStar=null;S.codiName='';S.codiApplied=false;S.curSearched=false;S.codiSearched=false;S.bev={물:4,커피:1,차:0,우유:0,요거트:0,두유:0,탄산음료:0,주스:0,스포츠음료:0,에너지음료:0};S.basket=[];S.nightBasket=[];S.dailyAmt=null;S.basketTab='한식';S.nightFreq=0;S.mealsPerDay=null;S.firstMealTime=null;S.meals=[{},{},{},{}];S._scrolledEnd=false;S.mealPhase=[0,0,0,0];$('survey').style.display='block';$('result').style.display='none';$('navbar').style.display='flex';var _tb=document.querySelector('.topbar');if(_tb)_tb.style.display='';render();window.scrollTo(0,0);}
+function restart(){step=0;S.mode='detail';S.simple={};S.riceType='흰쌀밥';S.name='';S.interests=[];S.exWeek=[null,null,null,null,null,null,null];S.alcWeek=[null,null,null,null,null,null,null];S.sleepReg='reg';S.sleepBed=23;S.sleepWake=7;S.sleepHours=7;S.sleepFeel=3;S.wakeOften=0;S.napHours=0;S.sex=null;S._bodyEdited=false;S.height=170;S.weight=70;S.abdomen=null;S.thigh=null;S.mvStar=0;S.mvHas=null;S.mvPrice=null;S.mvName='';S.curStar=null;S.codiStar=null;S.codiName='';S.codiApplied=false;S.curSearched=false;S.codiSearched=false;S.bev={물:3,커피:0,차:0,우유:0,요거트:0,두유:0,탄산음료:0,주스:0,스포츠음료:0,에너지음료:0};S.basket=[];S.nightBasket=[];S.dailyAmt=null;S.basketTab='한식';S.nightFreq=0;S.mealsPerDay=3;S.firstMealTime=null;S.meals=[{},{},{},{}];S._scrolledEnd=false;S.mealPhase=[0,0,0,0];$('survey').style.display='block';$('result').style.display='none';$('navbar').style.display='flex';var _tb=document.querySelector('.topbar');if(_tb)_tb.style.display='';render();window.scrollTo(0,0);}
 
 render();
 
