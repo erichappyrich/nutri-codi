@@ -3448,7 +3448,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V2.5';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V2.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4414,16 +4414,16 @@ function mhpLifestyle(v,r){
   fired.forEach(function(k,i){h+='<div class="goal" style="align-items:flex-start;margin-bottom:9px"><span class="gi">'+(i+1)+'</span><div><b style="font-size:14.5px">'+(GOAL[k]||k)+'</b>'+(STIP[k]?'<div style="font-size:12.5px;color:#5B6B75;margin-top:3px;line-height:1.6">'+STIP[k]+'</div>':'')+'</div></div>';});
   h+='</div>';
  }
- var ints=(v.interests||[]), key=null, D=null;
- for(var i=0;i<ints.length;i++){var dd=INTEREST_DEEP[ints[i]]||LSX[ints[i]];if(dd){key=ints[i];D=dd;break;}}
- if(D){
-  h+='<div class="sec"><h3><span class="n">🎯</span> 관심분야 케어 — '+mhpLabel(key)+'</h3>';
-  h+='<div style="background:#eef6f1;border-left:4px solid #17A6B8;border-radius:8px;padding:13px 15px">';
-  if(D.why)h+='<p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 9px">'+D.why+'</p>';
-  if(D.exercise)h+='<div style="font-size:12.5px;line-height:1.7;margin-bottom:8px"><b style="color:#0E7C66">🏃 운동</b><br>'+D.exercise+'</div>';
-  if(D.lifestyle)h+='<div style="font-size:12.5px;line-height:1.7"><b style="color:#0E7C66">🌱 생활습관</b><br>'+D.lifestyle+'</div>';
-  h+='</div></div>';
- }
+ var ints=(v.interests||[]), cards='';
+ ints.forEach(function(key){var D=INTEREST_DEEP[key]||LSX[key]; if(!D)return;
+  cards+='<div style="background:#eef6f1;border-left:4px solid #17A6B8;border-radius:8px;padding:13px 15px;margin-bottom:10px">';
+  cards+='<div style="font-weight:800;font-size:14.5px;color:#0E7C66;margin-bottom:6px">'+mhpLabel(key)+'</div>';
+  if(D.why)cards+='<p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 9px">'+D.why+'</p>';
+  if(D.exercise)cards+='<div style="font-size:12.5px;line-height:1.7;margin-bottom:8px"><b style="color:#0E7C66">🏃 운동</b><br>'+D.exercise+'</div>';
+  if(D.lifestyle)cards+='<div style="font-size:12.5px;line-height:1.7"><b style="color:#0E7C66">🌱 생활습관</b><br>'+D.lifestyle+'</div>';
+  cards+='</div>';
+ });
+ if(cards)h+='<div class="sec"><h3><span class="n">🎯</span> 관심분야 케어</h3>'+cards+'</div>';
  return h;
 }
 function showMHP(){
@@ -4440,14 +4440,14 @@ function showMHP(){
     var macroAdd={protein:0,fiber:0}; items.forEach(function(it){if(it.macroAdd)Object.keys(it.macroAdd).forEach(function(m){macroAdd[m]=(macroAdd[m]||0)+it.macroAdd[m];});});
     var nutBA=function(k){var n=(r.nut||[]).filter(function(x){return x.k===k;})[0]; if(!n)return null; var bef=(n.pctDiet!=null?n.pctDiet:n.pct); var aft=Math.max(bef,microAfter[k]||0); return {n:k,b:Math.min(100,bef),a:Math.min(100,aft)};};
     var vits=['비타민C','비타민D','비타민A','비타민E','비타민K','비타민B1','비타민B2','나이아신','판토텐산','비타민B6','비오틴','엽산','비타민B12'].map(nutBA).filter(Boolean);
-    var mins=['칼슘','마그네슘','아연','철','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);
+    var mins=['칼슘','마그네슘','아연','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);   // 철 제외
     var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000, meals=Math.max(1,+(S.mealsPerDay)||3);
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
     var protT=wkg*1.2, carbT=tdee*0.55/4, fatT=tdee*0.28/9, fibT=27;    // 단백질=최적섭취(1.2g/kg) 기준
     var Pg=M?M.prot:0, Cg=M?M.carb:0, Fg=M?M.fat:0, FBg=M?M.fiber:0;
     var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(200,p100(Cg,carbT)), mFat=Math.min(200,p100(Fg,fatT)), mFib=Math.min(200,p100(FBg,fibT));
-    // 뉴트리밀 한 끼 대체 시: 보통 '탄수·지방 많은 끼니'를 대체 → 탄수·지방은 많이 빠지고(×0.58/0.60), 단백·식이섬유는 적게 빠지며(×0.85/0.88) 뉴트리밀이 단백25·식이섬유14·탄20·지5g 보충 → 단백질·식이섬유는 오히려 올라감
-    var nProt=Math.min(200,p100(Pg*0.85+25,protT)), nCarb=Math.min(200,p100(Cg*0.58+20,carbT)), nFat=Math.min(200,p100(Fg*0.60+5,fatT)), nFib=Math.min(200,p100(FBg*0.88+14,fibT));
+    // 뉴트리밀 한 끼 대체 시: 단백질은 한 끼분(1/meals) 빠지고 +24g, 탄수·지방 많은 끼니라 많이 빠지며(×0.58/0.60), 식이섬유는 적게 빠지고(×0.88)+14g 보충
+    var nProt=Math.min(200,p100(Pg*(1-1/meals)+24,protT)), nCarb=Math.min(200,p100(Cg*0.58+20,carbT)), nFat=Math.min(200,p100(Fg*0.60+5,fatT)), nFib=Math.min(200,p100(FBg*0.88+14,fibT));
     var fishSig=0; try{(S.basket||[]).concat(S.nightBasket||[]).forEach(function(nm){if(/생선|고등어|연어|참치|회|조림|멸치|꽁치|삼치/.test(nm))fishSig++;});}catch(e){}
     var efaB=Math.max(15,Math.min(70,22+fishSig*14)), coqB=Math.max(22,Math.min(60,Math.round(60-Math.max(0,age-30)*1.0)));   // CoQ10=체내합성+소량식품, 나이들수록↓
     mins.push({n:'필수지방산(오메가3)',b:efaB,a:exSet.omega3?98:efaB});
@@ -4457,8 +4457,7 @@ function showMHP(){
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
     h+='<p class="leg" style="margin:0 0 7px">막대 색 = 지금 충족도 (<span style="color:#F0503F;font-weight:800">부족</span> → <span style="color:#17A6B8;font-weight:800">충분</span>) &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
     h+='<div class="segbtns"><button id="gbBefore" class="segbtn" onclick="mhpSetGraph(\'before\')">섭취 전</button><button id="gbAfter" class="segbtn on" onclick="mhpSetGraph(\'after\')">섭취 후</button></div>';
-    h+=baGroup('미량영양소 · 비타민',vits,false);
-    h+=baGroup('미량영양소 · 미네랄',mins,false);
+    h+=baGroup('미량영양소',vits.concat(mins),false);
     h+='</div>';
     /* --- 03 대량영양소 & 혈당 (식사 ↔ 뉴트리밀 토글) --- */
     var gi=Math.round((M&&M.giAvg)?M.giAvg:50); _mhpGi=gi;
@@ -4514,7 +4513,7 @@ function showMHP(){
       npOrder.forEach(function(n){if(npUsed[n])return;if(n==='FOS 액티브'&&npUsed['화이버지 플러스'])return;npUsed[n]=1;rankList.push({name:n,price:'',l1:(NPFUNC[n]||RBLURB[n]||''),l2:''});});
       rankList=rankList.slice(0,8);
     } else {
-      items.forEach(function(it){rankList.push({name:it.name,price:it.price||'',l1:(it.func||it.desc||''),l2:it.desc||''});});
+      items.forEach(function(it){rankList.push({name:it.name,price:'',l1:(it.func||it.desc||''),l2:it.desc||''});});
       extra.forEach(function(x){rankList.push({name:x.n,price:'',l1:(RBLURB[x.n]||'부족한 영양 보완'),l2:''});});
     }
     // 중요도 등급(1/2/3) 할당 후 등급 오름차순 정렬(동급은 기존 순서 유지)
@@ -4522,13 +4521,11 @@ function showMHP(){
     rankList.sort(function(a,b){return a.tier-b.tier;});
     S.mhpPick={}; rankList.forEach(function(r,i){S.mhpPick[r.name]=(i<5);});
     h+='<div class="sec"><h3><span class="n">🎯</span> 나에게 맞는 유사나 순위</h3>';
-    if(noPill)h+='<div style="background:#FFF7E8;border:1px solid #F0DBA8;border-radius:11px;padding:12px 14px;margin:-2px 0 12px"><b>🥤 알약이 어려우시다고 하셔서</b> 삼키기 쉬운 <b>가루·씹는·액상 제품</b> 위주로 골랐어요.</div>';
-    h+='<p class="leg" style="margin:-2px 0 12px"><b>중요도 순</b>으로 묶었어요. <b>1순위부터</b> 챙기시고, 여유에 맞게 더해가세요. <br>오른쪽 <b>✓</b>로 드실 제품을 고르면 <b>섭취 희망서</b>를 만들 수 있어요(1~5위 기본 선택).</p>';
-    var TLABEL={1:['⭐ 1순위 · 꼭 챙기세요','#1E3A6B'],2:['2순위 · 함께 챙기면 좋아요','#3B6A78'],3:['3순위 · 여유될 때','#8A94A0']};
+    if(noPill)h+='<div style="background:#FFF7E8;border:1px solid #F0DBA8;border-radius:11px;padding:11px 13px;margin:-2px 0 10px"><b>🥤 삼키기 쉬운 가루·씹는·액상 제품</b>만 골랐어요.</div>';
+    var TLABEL={1:['⭐ 1순위','#1E3A6B'],2:['2순위','#3B6A78'],3:['3순위','#8A94A0']};
     var curTier=0, rank=0;
-    rankList.forEach(function(r){rank++;var newGrp=(r.tier!==curTier);if(newGrp){curTier=r.tier;h+='<div style="font-weight:800;font-size:13px;letter-spacing:.01em;margin:'+(rank>1?'17px':'2px')+' 0 5px;color:'+TLABEL[curTier][0+1]+'">'+TLABEL[curTier][0]+'</div>';}h+=mhpRankRow(rank,r.name,r.price,r.l1,r.l2,newGrp);});
+    rankList.forEach(function(r){rank++;var newGrp=(r.tier!==curTier);if(newGrp){curTier=r.tier;h+='<div style="font-weight:800;font-size:14px;letter-spacing:.01em;margin:'+(rank>1?'17px':'4px')+' 0 5px;color:'+TLABEL[curTier][1]+'">'+TLABEL[curTier][0]+'</div>';}h+=mhpRankRow(rank,r.name,r.price,r.l1,r.l2,newGrp);});
     if(warn.length)h+='<div style="margin-top:12px">'+mhpPill('⚠ 복용 주의','#FDEDEC','#C0392B')+'<div class="leg" style="color:#C0392B;margin-top:4px">'+warn.join(', ')+' — 전문가 상담 후 드세요.</div></div>';
-    if(!noPill&&rec.tag.indexOf('체중')>=0)h+='<p class="leg" style="margin-top:12px;background:#F4F8F6;border-radius:10px;padding:10px 12px">💡 고GI·체중엔 <b>뉴트리밀 액티브로 한 끼 대체</b>가 가장 빨라요(위 혈당 섹션 참고).</p>';
     h+='<button class="navbtn" style="width:100%;margin-top:14px" onclick="mhpWishlist()">📋 체크한 제품으로 섭취 희망서 보기</button>';
     h+='</div>';
     h+=mhpLifestyle(v,r);
