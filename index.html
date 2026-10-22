@@ -3454,7 +3454,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V2.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V2.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4443,11 +4443,19 @@ function showMHP(){
     var mkUsed=function(n){used[n]=1;(OVERLAP[n]||[]).forEach(function(o){used[o]=1;});};
     items.forEach(function(it){ mkUsed(it.name); (it.has||[]).forEach(mkUsed); if(it.fullMV)fullMV=true; });
     if(fullMV)['비타민D','폴리C','부스터 C600','액티브 미네랄 드링크'].forEach(mkUsed);   // 마그네칼D는 칼슘갭 보충용으로 열어둠
-    // 단품 제품의 영양 커버(그래프 집계용): 미량%·ex(오메가3/CoQ10 등)
-    var PCOV={'마그네칼 D':{micro:{칼슘:90,마그네슘:100,비타민D:200}},'비타민D':{micro:{비타민D:200}},'폴리C':{micro:{비타민C:400}},'부스터 C600':{micro:{비타민C:600}},'프로후라바놀 C300':{micro:{비타민C:300}},'코퀴논 30':{ex:{coq10:1}},'바이오메가':{ex:{omega3:1}},'비전엑스 디에스':{ex:{eye:1}},'프로코사 글루코사민':{ex:{glucosamine:1}},'헤파실 플러스':{ex:{liver:1}},'프로바이오틱':{ex:{probiotic:1}}};
-    var microAfter={}, exSet={};
-    var addCov=function(micro,ex){ if(micro)Object.keys(micro).forEach(function(k){microAfter[k]=Math.max(microAfter[k]||0,micro[k]);}); if(ex)Object.keys(ex).forEach(function(e){exSet[e]=1;}); };
-    items.forEach(function(it){ addCov(it.micro, it.ex); });
+    // ===== 그래프 100% 기준 = NutriSearch Blended ODI(최적, 절대량). 한국 영양성분기준치로 식사·유사나 환산 =====
+    var NS_ODI={비타민A:1125,비타민D:50,비타민E:300,비타민C:1125,비타민K:360,비타민B1:55,비타민B2:45,나이아신:88,판토텐산:94,비타민B6:63,비오틴:250,엽산:600,비타민B12:175,칼슘:800,마그네슘:280,아연:25,셀렌:150,구리:2,망간:7,요오드:1000,크롬:238,몰리브덴:65};
+    var KREF={비타민A:700,비타민D:10,비타민E:11,비타민C:100,비타민K:70,비타민B1:1.2,비타민B2:1.4,나이아신:15,판토텐산:5,비타민B6:1.5,비오틴:30,엽산:400,비타민B12:2.4,칼슘:700,마그네슘:315,아연:8.5,셀렌:55,구리:0.8,망간:3,요오드:150,크롬:30,몰리브덴:25};
+    var dietQ=(v.diet==='good'?1.25:v.diet==='low'?0.7:1.0);
+    // 식사 섭취량(절대): 칼슘·마그네슘=실제 식사+음료, 비타민D=식품기여 극소(0.3×), 나머지=기준치×식단질
+    var dietAbs=function(k){ if(k==='칼슘')return (v.caFood||0)+(v.caBev||0); if(k==='마그네슘')return (v.mgFood||0)+(v.mgBev||0); if(k==='비타민D')return (KREF[k]||0)*0.3*dietQ; return (KREF[k]||0)*dietQ; };
+    // 유사나 제품들이 제공하는 양(절대, 기준치단위 합산). it.micro/PCOV = %기준치
+    var usanaAbs={}, exSet={};
+    var addUsana=function(pctMap,ex){ if(pctMap)Object.keys(pctMap).forEach(function(k){ if(KREF[k]==null)return; usanaAbs[k]=(usanaAbs[k]||0)+pctMap[k]/100*KREF[k]; }); if(ex)Object.keys(ex).forEach(function(e){exSet[e]=1;}); };
+    var afterPct=function(k){ return NS_ODI[k]?(dietAbs(k)+(usanaAbs[k]||0))/NS_ODI[k]*100:0; };
+    items.forEach(function(it){ addUsana(it.micro, it.ex); });
+    // 단품 제품 영양 커버(%기준치)
+    var PCOV={'마그네칼 D':{micro:{칼슘:36,마그네슘:50,비타민D:400}},'비타민D':{micro:{비타민D:2500}},'폴리C':{micro:{비타민C:600}},'부스터 C600':{micro:{비타민C:600}},'프로후라바놀 C300':{micro:{비타민C:300}},'코퀴논 30':{ex:{coq10:1}},'바이오메가':{ex:{omega3:1}},'비전엑스 디에스':{ex:{eye:1}},'프로코사 글루코사민':{ex:{glucosamine:1}},'헤파실 플러스':{ex:{liver:1}},'프로바이오틱':{ex:{probiotic:1}}};
     var macroAdd={protein:0,fiber:0}; items.forEach(function(it){if(it.macroAdd)Object.keys(it.macroAdd).forEach(function(m){macroAdd[m]=(macroAdd[m]||0)+it.macroAdd[m];});});
     var ADDPOOL=[
      {n:'프로바이오틱',c:['변비','위장','면역','피부']},{n:'바이오메가',c:['혈중지질','눈 건강','기억력','피부','혈압']},
@@ -4465,17 +4473,17 @@ function showMHP(){
     var scored=ADDPOOL.filter(function(p){return !used[p.n]&&!(p.fem&&v.sex!=='f');}).map(function(p){var s=0,mc=null;p.c.forEach(function(c){if(L.indexOf(c)>=0){s++;if(!mc)mc=c;}});return {n:p.n,s:s,c:mc};});
     scored.sort(function(a,b){return b.s-a.s;});
     var extra=[]; scored.forEach(function(x){if((items.length+extra.length)>=10||used[x.n])return;mkUsed(x.n);extra.push(x);});
-    // 칼슘이 여전히 부족하면(팩은 70%까지만) 마그네칼 D를 추가로 권장
-    if((microAfter['칼슘']||0)<80 && !used['마그네칼 D'] && (items.length+extra.length)<10){ mkUsed('마그네칼 D'); extra.push({n:'마그네칼 D',c:'칼슘'}); }
+    // 칼슘이 팩 섭취 후에도 부족하면(80% 미만) 마그네칼 D를 추가로 권장
+    if(afterPct('칼슘')<80 && !used['마그네칼 D'] && (items.length+extra.length)<10){ mkUsed('마그네칼 D'); extra.push({n:'마그네칼 D',c:'칼슘'}); }
     ['프로바이오틱','바이오메가','프로후라바놀 C300','비타민D','폴리C','e프라임','헤파실 플러스'].forEach(function(n){if((items.length+extra.length)>=10||used[n])return;mkUsed(n);extra.push({n:n,c:null});});
-    // 추천된 단품들의 커버를 그래프 '유사나로 채워지는 양'에 반영
-    extra.forEach(function(x){ var pc=PCOV[x.n]; if(pc)addCov(pc.micro, pc.ex); });
+    // 추천된 단품들의 커버를 '유사나로 채워지는 양'에 반영
+    extra.forEach(function(x){ var pc=PCOV[x.n]; if(pc)addUsana(pc.micro, pc.ex); });
     var warn=[]; if(exSet.omega3&&(v.meds||[]).some(function(m){return m.indexOf('항응고제')>=0;}))warn.push('오메가3 ↔ 항응고제');
-    if((microAfter['칼슘']||0)>0&&(v.health||[]).indexOf('콩팥병')>=0)warn.push('칼슘·마그네슘 ↔ 콩팥병');
-    /* ===== 02 섭취 전 → 후 그래프 ===== */
-    var nutBA=function(k){var n=(r.nut||[]).filter(function(x){return x.k===k;})[0]; if(!n)return null; var bef=(n.pctDiet!=null?n.pctDiet:n.pct); var aft=Math.max(bef,microAfter[k]||0); return {n:k,b:Math.min(100,bef),a:Math.min(100,aft)};};
+    if((usanaAbs['칼슘']||0)>0&&(v.health||[]).indexOf('콩팥병')>=0)warn.push('칼슘·마그네슘 ↔ 콩팥병');
+    /* ===== 02 섭취 전 → 후 그래프 (100%=NutriSearch ODI, 전·후 같은 잣대) ===== */
+    var nutBA=function(k){ if(NS_ODI[k]==null)return null; var bef=dietAbs(k)/NS_ODI[k]*100, aft=afterPct(k); return {n:k,b:Math.round(Math.min(100,bef)),a:Math.round(Math.min(100,Math.max(bef,aft)))}; };
     var vits=['비타민C','비타민D','비타민A','비타민E','비타민K','비타민B1','비타민B2','나이아신','판토텐산','비타민B6','비오틴','엽산','비타민B12'].map(nutBA).filter(Boolean);
-    var mins=['칼슘','마그네슘','아연','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);   // 철 제외
+    var mins=['칼슘','마그네슘','아연','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);   // 철 제외(NutriSearch NR)
     var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000, meals=Math.max(1,+(S.mealsPerDay)||3);
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
     var protT=wkg*1.2, carbT=tdee*0.55/4, fatT=tdee*0.28/9, fibT=27;    // 단백질=최적섭취(1.2g/kg) 기준
