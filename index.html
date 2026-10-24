@@ -3098,17 +3098,17 @@ function compute(v){
     return{k:n.k,pctDiet,pctSupp,pctSuppMax,pctFull,pct:Math.min(pctDiet+pctSupp,100)};});
   // ★ 미량 충족도를 새 기준(식사RDA+뉴트리서치ODI)으로 재계산 — 물방울 점수·그래프 통일. 영양제 등급(mvStar)도 반영
   const _mvAbs=function(k){ return (HP_MICRO[k]? (HP_MICRO[k]/100*(KREF[k]||0))*(starCov(mvStar)/0.9) : 0); };   // 현재 복용 영양제(별점) 미량 기여 추정
-  const _befNS=MICROKEYS.map(k=>nsBeforePct(k,v));
-  const _nowNS=MICROKEYS.map(k=>{var t=nsTarget(k);return t?Math.min(100,(nsDietAbs(k,v)+_mvAbs(k))/t*100):0;});
-  const lowCount=_nowNS.filter(p=>p<65).length;
+  const _befNS=MICROKEYS.map(k=>zonePos(nsDietAbs(k,v), KREF[k]||0, NS_ODI[k]||0));                 // 2존 위치(식사 권장량=50%, 최적=100%)
+  const _nowNS=MICROKEYS.map(k=>zonePos(nsDietAbs(k,v)+_mvAbs(k), KREF[k]||0, NS_ODI[k]||0));
+  const lowCount=_nowNS.filter(p=>p<50).length;   // 2존 50% 미만 = 식사 권장량(RDA) 미달
   const _evm=+(v.exVigMin||0),_emd=+(v.exMaxDay||0); let exOver=0; if(_evm>=900||_emd>=210)exOver=2; else if(_evm>=600||_emd>=150)exOver=1;
   const C={};C.GI=[0,1,2,3][v.gi];C.과식=v.amount>=1?[null,1,2,3][v.amount]:0;C.가공=[0,1,2][v.proc];C.단백질=v.protein===2?0:v.protein===1?1:3;
   C.과소섭취=bmi<18.5?2:(bmi<20.5&&(v.amount<0||v.protein===0))?1:(v.amount<0&&bmi<22)?1:0;
-  C.미량=lowCount===0?0:lowCount<=4?1:lowCount<=9?2:3;C.근력=[3,2,1,0][v.strength];C.수면부족=[3,2,1,0][v.sleep];C.수면리듬=[0,1,2][v.rhythm];
+  C.미량=lowCount===0?0:lowCount<=8?1:lowCount<=14?2:3;C.근력=[3,2,1,0][v.strength];C.수면부족=[3,2,1,0][v.sleep];C.수면리듬=[0,1,2][v.rhythm];
   C.음주={none:0,low:1,mod:2,high:3}[alc];C.흡연={none:0,low:1,high:2,vhigh:3}[v.smoke];C.복부=(v.preg==='임신중'||v.preg==='수유중')?0:v.abdomen;C.식사리듬=v.mealRhythm||0;
   const fatThigh=(v.thigh==='thick'&&v.abdomen>=2&&bmi>=22);
   const muscular=(v.thigh==='thick'&&!fatThigh);
-  C.근육=(v.thigh==='thin'&&v.strength===0)?3:(v.thigh==='thin')?2:muscular?0:(v.strength===0?1:0);
+  C.근육=muscular?0:(v.thigh==='thin')?(v.strength>=2?0:v.strength===1?1:3):(v.strength===0?1:0);   // 얇은 허벅지라도 근력운동 주2~3회(strength≥2)면 근육 문제 없음
   if(v.age>=60&&C.근육>0)C.근육=Math.min(3,C.근육+1);
   const sc={};for(const k in C)sc[k]=C[k]===0?0:CSCORE[k][C[k]-1];
   const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:0;
@@ -3118,12 +3118,12 @@ function compute(v){
   // 음식 질 문제는 보충제로 못 가리고, 충족 부족(보충 안 함)도 식습관을 떨어뜨린다.
   const microPctDiet=Math.round(_befNS.reduce((a,b)=>a+b,0)/_befNS.length);   // 식사만
   const microPct=Math.round(_nowNS.reduce((a,b)=>a+b,0)/_nowNS.length);       // 식사+현재영양제
-  const defCount=_nowNS.filter(p=>p<60).length;
+  const defCount=_nowNS.filter(p=>p<40).length;   // 2존 40% 미만 = 권장량의 ~80%도 안 됨 = 실제 부족
   // 식습관 = 식단 자체의 질만 반영(영양제로는 안 오름 — 영양제는 '미량 충족도'에만 반영).
   //  = 식단 영양밀도(충족Score, 영양제 제외한 microPctDiet 기준) 0.5 + 음식 선택 질(foodScore) 0.5.
   // ※ 결핍 감점(defPenalty)은 제거: 식단만으론 22종을 다 못 채워 누구나 최대로 걸려 완벽식단도 '주의'로 나오던 문제 해결. 결핍은 '미량 충족도'가 따로 반영.
   // 미량 충족(총합 microPct)이 낮으면 식습관 라벨 상한 — '미량 결핍인데 식사 좋음/양호' 모순 방지
-  const microCap=microPct>=50?90:microPct>=42?74:microPct>=34?60:microPct>=28?50:microPct>=22?44:microPct>=16?40:30;   // 새 microPct 범위로 재보정
+  const microCap=microPct>=55?95:microPct>=48?85:microPct>=42?74:microPct>=36?62:microPct>=30?52:microPct>=24?44:38;   // 2존 microPct(식사≈50) 범위로 재보정
   let foodScore=95;
   foodScore-=[0,10,28,48][v.gi]||0;   // GI 감점 완만화(절벽 제거)+레벨3 NaN 버그 수정
   foodScore-=(v.diet==='good'?0:v.diet==='mid'?3:30)+(v.proc===2?12:v.proc===1?4:0);
@@ -3137,8 +3137,8 @@ function compute(v){
   const 수면습관=hb(['수면부족','수면리듬']);
   const habitRisk=Math.round((식습관+운동습관+수면습관)/3);
   const lifeRisk=Math.max(sc['음주']||0,sc['흡연']||0);
-  let nutritionRisk=microPct<18?78:microPct<26?60:microPct<34?42:microPct<45?25:microPct<58?12:microPct<70?7:3;   // 새 microPct 범위로 재보정
-  if(defCount===0)nutritionRisk=Math.min(nutritionRisk, microPct>=75?7:12);   // 실제 결핍(60%↓)이 하나도 없으면 '최적 미달'일 뿐이라 위험 완화(그래프 빨강 없음과 일치)
+  let nutritionRisk=microPct<30?70:microPct<38?52:microPct<45?38:microPct<52?25:microPct<62?14:microPct<75?8:4;   // 2존 microPct 범위로 재보정
+  if(defCount<=2)nutritionRisk=Math.min(nutritionRisk, microPct>=75?6:defCount===0?10:16);   // 실제 부족(2존<40)이 거의 없으면 '최적 미달'일 뿐이라 위험 완화
   // ── 총점 = 100 − 습관감점 − 미량감점 − 복부감점 (0~100) · '미래 건강을 좌우하는 현재 습관' 평가 관점 ──
   // 배가 볼록↑이면 소식으로 입력해도 실제 섭취가 많을 확률이 높아 과식을 최소 한 단계 올려 반영
   const _effOver=Math.max(C.과식,C.복부>=3?2:C.복부>=2?1:0);   // 배 볼록↑ 과식 보정 (임신·수유 중엔 C.복부=0이라 보정 없음)
@@ -3153,14 +3153,14 @@ function compute(v){
   const _pSt=[0,0,4,7][v.stress]||0;                                       // 스트레스 = 코르티솔·심혈관·정신건강 위험 (독립 감점, 미량 소모와 별개)
   const _habitRaw=_pGI+_pCal+_pMac+_pProc+_pEx+_pSl+_pSm+_pAl+_pSt;
   const _habitEff=_habitRaw<=45?_habitRaw:45+(_habitRaw-45)*0.55;         // 완충: 45 초과분은 55%만 반영
-  const _pMic=Math.max(0,Math.min(40,Math.round((45-microPct)*1.0)));    // 미량 감점: 새 기준(식사RDA+뉴트리서치ODI) microPct(≈10~45) 범위로 재보정
+  const _pMic=Math.max(0,Math.min(40,Math.round((60-microPct)*0.9)));    // 미량 감점: 2존 microPct(식사≈50·유사나≈90) — 식사로 권장량 채우면 감점 작게
   let _pAb=[0,3,10,16][C.복부]||0;                                        // 복부지방 감점 (임신·수유 중엔 C.복부=0 → 감점 없음)
   if(v.thigh==='thin'&&C.복부>=2)_pAb=Math.round(_pAb*1.4);               // 얇은 허벅지+복부 = 대사증후군 취약 가중
   const score01=Math.max(0,Math.min(100,Math.round(100-_habitEff-_pMic-_pAb)));
   const overall=100-score01;   // 하위 로직(lvl·예상점수·클램프)이 100-overall로 점수를 뽑으므로 형태 유지
   const weightSignal=((bmi>=23)||(v.abdomen>=2)||(v.amount>=2))&&!(v.preg==='임신중'||v.preg==='수유중');   // 임신·수유 중엔 체중/감량 안내 억제
   let areas=Object.keys(AREAS).map(a=>{const drv=AREAS[a].filter(k=>sc[k]>0).sort((x,y)=>sc[y]-sc[x]);const present=AREAS[a].map(k=>sc[k]).filter(x=>x>0);const _mx=present.length?Math.max.apply(null,present):0;let score=(0.55*_mx+0.45*avg(present))*(0.7+0.3*present.length/AREAS[a].length);if(a==='체중'&&!weightSignal)score=0;return{a,score:Math.round(score),drivers:drv};});
-  areas.push({a:'영양 균형',score:Math.min(85,Math.max(nutritionRisk,defCount*13)),drivers:['미량']});
+  areas.push({a:'영양 균형',score:Math.min(85,Math.max(nutritionRisk,defCount*8)),drivers:['미량']});
   let shown=areas.filter(x=>x.score>38).sort((x,y)=>y.score-x.score).slice(0,5);
   v.interests.map(i=>INT2AREA[i]).filter(Boolean).forEach(a=>{if(!shown.find(x=>x.a===a)){const ar=areas.find(x=>x.a===a);if(ar)shown.push(ar);}});
   shown=shown.slice(0,5);
@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4171,7 +4171,7 @@ function pncHeroHtml(v,r,eb,tt){
   var st=score>=70?'good':score>=45?'warn':'risk';
   var wg=st==='good'?['#3AC8D6','#17A6B8']:st==='warn'?['#FF7D42','#E85A18']:['#FF5A4D','#E23325'];
   var wtint=st==='good'?'#D9F0F4':st==='warn'?'#FFDCC8':'#FFD2CD', wwave=st==='good'?'#7FD4DE':st==='warn'?'#FF9A66':'#FF8074';
-  var LBL={GI:'혈당 부담',과식:'과식',가공:'가공식품 많음',단백질:'단백질 부족',과소섭취:'섭취 부족',미량:(r.defCount>0?'미량영양소 결핍':'미량영양소 약간 부족'),근력:'운동 부족',수면부족:'수면 부족',수면리듬:'수면 리듬',음주:'음주',흡연:'흡연',복부:'복부지방',근육:'근육 부족',식사리듬:'식사 리듬'};
+  var LBL={GI:'혈당 부담',과식:'과식',가공:'가공식품 많음',단백질:'단백질 부족',과소섭취:'섭취 부족',미량:(r.defCount>=8?'미량영양소 결핍':r.defCount>0?'미량영양소 부족':'미량영양소 약간 부족'),근력:'운동 부족',수면부족:'수면 부족',수면리듬:'수면 리듬',음주:'음주',흡연:'흡연',복부:'복부지방',근육:'근육 부족',식사리듬:'식사 리듬'};
   var chips=Object.entries(r.sc||{}).filter(function(e){return e[1]>=25&&LBL[e[0]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){var k=e[0],vv=e[1];return `<span class="rhero-chip"><span class="cd" style="background:${vv>=55?'#FF6E60':vv>=35?'#FFB020':'#FFC94D'}"></span>${LBL[k]}</span>`;}).join('');
   var lead=st==='good'?'물방울이 가득 찼어요. 좋은 상태예요':st==='warn'?'물방울을 더 채워볼까요':'물방울이 많이 비었어요';
   var html=`<div class="rhero ${st}"><div class="rhero-eb">${eb||'맞춤영양 코디 · 영양 종합 분석'}</div><div class="rhero-tt">${tt||'지금 상태를 살펴봤어요'}</div><div class="rhero-lead">${lead}</div><div class="dropwrap"><svg viewBox="0 0 172 196"><defs><clipPath id="pncDrop"><path d="M86 8 C126 58 150 92 150 120 A64 64 0 1 1 22 120 C22 92 46 58 86 8 Z"/></clipPath><linearGradient id="pncWg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wg[0]}"/><stop offset="1" stop-color="${wg[1]}"/></linearGradient></defs><g clip-path="url(#pncDrop)"><rect x="0" y="0" width="172" height="196" fill="${wtint}"/><g class="water" id="pncWater" transform="translate(0,196)"><path class="wave" d="M0 10 Q25 0 50 10 T100 10 T150 10 T200 10 T250 10 T300 10 T350 10 T400 10 V200 H-100 Z" fill="url(#pncWg)"/><path class="wave2" d="M0 12 Q25 4 50 12 T100 12 T150 12 T200 12 T250 12 T300 12 T350 12 T400 12 V200 H-100 Z" fill="${wwave}"/></g></g><path d="M86 8 C126 58 150 92 150 120 A64 64 0 1 1 22 120 C22 92 46 58 86 8 Z" fill="none" stroke="${wg[0]}" stroke-width="2.5" opacity=".9"/><ellipse cx="60" cy="150" rx="11" ry="17" fill="#fff" opacity=".2" transform="rotate(-20 60 150)"/></svg><div class="dcenter"><div class="dscore"><span id="pncScore" data-score="${score}">0</span><small>/100</small></div><div class="dstate">${LWORD[L]}</div></div></div>${chips?`<div class="rhero-chips">${chips}</div>`:''}</div>`;
@@ -4730,7 +4730,7 @@ function showResult(){
     const wg=st==='good'?['#3AC8D6','#17A6B8']:st==='warn'?['#FF7D42','#E85A18']:['#FF5A4D','#E23325'];
     const wtint=st==='good'?'#D9F0F4':st==='warn'?'#FFDCC8':'#FFD2CD';
     const wwave=st==='good'?'#7FD4DE':st==='warn'?'#FF9A66':'#FF8074';
-    const LBL={GI:'혈당 부담',과식:'과식',가공:'가공식품 많음',단백질:'단백질 부족',과소섭취:'섭취 부족',미량:S.mode==='simple'?'미량영양소 일부 부족 가능':(r.defCount>0?'미량영양소 결핍':'미량영양소 약간 부족'),근력:'운동 부족',수면부족:'수면 부족',수면리듬:'수면 리듬',음주:'음주',흡연:'흡연',복부:'복부지방',근육:'근육 부족',식사리듬:'식사 리듬'};
+    const LBL={GI:'혈당 부담',과식:'과식',가공:'가공식품 많음',단백질:'단백질 부족',과소섭취:'섭취 부족',미량:S.mode==='simple'?'미량영양소 일부 부족 가능':(r.defCount>=8?'미량영양소 결핍':r.defCount>0?'미량영양소 부족':'미량영양소 약간 부족'),근력:'운동 부족',수면부족:'수면 부족',수면리듬:'수면 리듬',음주:'음주',흡연:'흡연',복부:'복부지방',근육:'근육 부족',식사리듬:'식사 리듬'};
     const chips=Object.entries(r.sc||{}).filter(([k,vv])=>vv>=25&&LBL[k]).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k,vv])=>`<span class="rhero-chip"><span class="cd" style="background:${vv>=55?'#FF6E60':vv>=35?'#FFB020':'#FFC94D'}"></span>${LBL[k]}</span>`).join('');
     const lead=st==='good'?'물방울이 가득 찼어요. 좋은 상태예요':st==='warn'?'물방울을 더 채워볼까요':'물방울이 많이 비었어요';
     let h=`<div class="rhero ${st}"><div class="rhero-eb">맞춤영양 코디 · 영양 종합 분석</div><div class="rhero-tt">지금 상태를 살펴봤어요</div><div class="rhero-lead">${lead}</div><div class="dropwrap"><svg viewBox="0 0 172 196"><defs><clipPath id="pncDrop"><path d="M86 8 C126 58 150 92 150 120 A64 64 0 1 1 22 120 C22 92 46 58 86 8 Z"/></clipPath><linearGradient id="pncWg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${wg[0]}"/><stop offset="1" stop-color="${wg[1]}"/></linearGradient></defs><g clip-path="url(#pncDrop)"><rect x="0" y="0" width="172" height="196" fill="${wtint}"/><g class="water" id="pncWater" transform="translate(0,196)"><path class="wave" d="M0 10 Q25 0 50 10 T100 10 T150 10 T200 10 T250 10 T300 10 T350 10 T400 10 V200 H-100 Z" fill="url(#pncWg)"/><path class="wave2" d="M0 12 Q25 4 50 12 T100 12 T150 12 T200 12 T250 12 T300 12 T350 12 T400 12 V200 H-100 Z" fill="${wwave}"/></g></g><path d="M86 8 C126 58 150 92 150 120 A64 64 0 1 1 22 120 C22 92 46 58 86 8 Z" fill="none" stroke="${wg[0]}" stroke-width="2.5" opacity=".9"/><ellipse cx="60" cy="150" rx="11" ry="17" fill="#fff" opacity=".2" transform="rotate(-20 60 150)"/></svg><div class="dcenter"><div class="dscore"><span id="pncScore" data-score="${score}">0</span><small>/100</small></div><div class="dstate">${LWORD[L]}</div></div></div>${chips?`<div class="rhero-chips">${chips}</div>`:''}</div>`;
