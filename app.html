@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4563,16 +4563,19 @@ function mhpImgFallback(cv,fn){
   var durl=cv.toDataURL('image/png'); var burl=durl; try{ if(window._shF)burl=URL.createObjectURL(window._shF); }catch(e){}
   window._mhpBurl=burl;
   var ua=navigator.userAgent||''; var isKakao=/KAKAOTALK/i.test(ua);
+  var _ver=(/[?&]v=([^&]*)/.exec(location.search)||[])[1]||'';
+  var _bu=(window._shPicks&&window._shPicks.length)?('app.html?'+(_ver?'v='+encodeURIComponent(_ver)+'&':'')+(window._shKind==='wish'?'wish':'img')+'='+encodeURIComponent(window._shPicks.join('|'))):'';
   var diag='share:'+(navigator.share?'Y':'N')+' · canShare:'+(navigator.canShare?'Y':'N')+' · file:'+(window._shF?'Y':'N')+' · '+(isKakao?'KAKAO':(/Instagram|FBAN|FBAV|NAVER|Line/i.test(ua)?'인앱':(/CriOS|Chrome/i.test(ua)?'크롬':(/Safari/i.test(ua)?'사파리':'기타'))));
   var tip=isKakao
    ? '<b style="color:#FFD84D">카톡 안에서는 저장이 막혀 있어요.</b><br><span style="font-weight:600;font-size:13.5px;color:#eef2f8">우측 상단 <b>⋮</b> → <b>\'다른 브라우저로 열기\'</b> 후 다시 하면 공유가 됩니다.</span>'
-   : '이미지를 <b>길게 눌러</b> \'사진에 저장\'<br><span style="font-weight:500;font-size:13px;color:#cdd8ea">안 되면 아래 <b>전체화면으로 보기</b>를 누르세요(길게눌러 저장·스크린샷)</span>';
+   : '앱에서 저장이 막히면 아래 <b style="color:#fff">브라우저에서 열기</b>를 누르세요.<br><span style="font-weight:500;font-size:13px;color:#cdd8ea">브라우저에서 이미지를 길게 눌러 저장·복사하면 됩니다.</span>';
   var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.9);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
   ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15px;text-align:center;margin-bottom:11px;max-width:420px;line-height:1.55">'+tip+'</div>'
    +'<img src="'+durl+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
-   +((navigator.clipboard&&window.ClipboardItem)?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#1E3A6B;color:#fff" onclick="mhpCopyImg()">📋 이미지 복사 → 카톡에 붙여넣기</button>':'')
-   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:'+((navigator.clipboard&&window.ClipboardItem)?'9':'14')+'px;padding:14px 0;background:#17A6B8;color:#fff" onclick="if(window._mhpBurl)location.href=window._mhpBurl">🖼️ 전체화면으로 보기(스크린샷)</button>'
-   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:9px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>'
+   +(_bu?'<a href="'+_bu+'" target="_blank" rel="noopener" class="navbtn" style="flex:none;display:block;max-width:420px;width:100%;margin-top:14px;padding:14px 0;text-align:center;text-decoration:none;background:#2ACB93;color:#fff">🌐 브라우저에서 이미지 열기 (저장·복사)</a>':'')
+   +((navigator.clipboard&&window.ClipboardItem)?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#1E3A6B;color:#fff" onclick="mhpCopyImg()">📋 이미지 복사 → 카톡에 붙여넣기</button>':'')
+   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#17A6B8;color:#fff" onclick="if(window._mhpBurl)location.href=window._mhpBurl">🖼️ 전체화면으로 보기(스크린샷)</button>'
+   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>'
    +'<div style="color:#7f8ca6;font-size:10.5px;margin-top:12px;text-align:center;letter-spacing:.2px">'+diag+'</div>';
   ov.onclick=function(e){if(e.target===ov)ov.remove();};
   document.body.appendChild(ov);
@@ -4593,10 +4596,13 @@ function mhpCopyImg(){
 function mhpShareWish(){
  var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
  if(!picks.length)return;
+ window._shPicks=picks; window._shKind='wish';
  mhpPrepShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n,p:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
 }
 function mhpShareUsage(){
+ var picks=window._usagePicks||Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
  var secs=mhpUsageSpec(window._usagePicks); if(!secs.length)return;
+ window._shPicks=picks; window._shKind='usage';
  var names=[]; var blocks=secs.map(function(s){ s.items.forEach(function(it){names.push(it.p);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(it){return {name:it.p+(it.amt?' · '+it.amt:''),p:it.p};})}; });
  mhpPrepShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'},names,'섭취방법안내.png','제품 섭취 방법 안내');
 }
@@ -4839,6 +4845,22 @@ function showResult(){
 }
 function restart(){step=0;S.mode='detail';S.simple={};S.riceType='흰쌀밥';S.name='';S.interests=[];S.exWeek=[null,null,null,null,null,null,null];S.alcWeek=[null,null,null,null,null,null,null];S.sleepReg='reg';S.sleepBed=23;S.sleepWake=7;S.sleepHours=7;S.sleepFeel=3;S.wakeOften=0;S.napHours=0;S.sex=null;S._bodyEdited=false;S.height=170;S.weight=70;S.abdomen=null;S.thigh=null;S.mvStar=0;S.mvHas=null;S.mvPrice=null;S.mvName='';S.curStar=null;S.codiStar=null;S.codiName='';S.codiApplied=false;S.curSearched=false;S.codiSearched=false;S.bev={물:3,커피:0,차:0,우유:0,요거트:0,두유:0,탄산음료:0,주스:0,스포츠음료:0,에너지음료:0};S.basket=[];S.nightBasket=[];S.dailyAmt=2;S.basketTab='한식';S.nightFreq=0;S.mealsPerDay=3;S.firstMealTime=null;S.meals=[{},{},{},{}];S._scrolledEnd=false;S.mealPhase=[0,0,0,0];$('survey').style.display='block';$('result').style.display='none';$('navbar').style.display='flex';var _tb=document.querySelector('.topbar');if(_tb)_tb.style.display='';render();window.scrollTo(0,0);}
 
-render();
+// ?img=제품1|제품2 (또는 ?wish=) → 안내서/희망서 이미지만 전체화면으로. 외부 브라우저로 열어 저장·복사하기 위함(A2U 등 앱 웹뷰 대응)
+function mhpBootImage(picks,kind){
+ var app=document.getElementById('app'); if(app)app.style.display='none';
+ document.body.style.background='#10131f';
+ var wrap=document.createElement('div'); wrap.style.cssText='min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px 12px 34px;gap:13px';
+ wrap.innerHTML='<div style="color:#cdd8ea;font-weight:700;font-size:14.5px;text-align:center;margin-top:8px;line-height:1.5">이미지를 <b style="color:#fff">길게 눌러</b> \'사진에 저장\' 또는 \'복사\'하세요</div><div id="_ipImg" style="color:#8794ad;margin-top:46px">이미지 만드는 중…</div>';
+ document.body.appendChild(wrap);
+ var spec, names=[];
+ if(kind==='wish'){ names=picks.slice(); spec={subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n,p:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'}; }
+ else { var secs=mhpUsageSpec(picks); var blocks=secs.map(function(s){ s.items.forEach(function(it){names.push(it.p);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(it){return {name:it.p+(it.amt?' · '+it.amt:''),p:it.p};})}; }); spec={subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'}; }
+ var go=function(){ mhpLoadImgs(names).then(function(imgs){ try{ var cv=mhpBuildCanvas(spec,imgs); var el=document.getElementById('_ipImg'); if(el)el.outerHTML='<img src="'+cv.toDataURL('image/png')+'" style="width:100%;max-width:470px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.5)">'; }catch(e){ var el2=document.getElementById('_ipImg'); if(el2)el2.textContent='이미지 생성 실패'; } }); };
+ if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go,go);}else go();
+}
+(function(){
+ try{ var mm=/[?&](img|wish)=([^&]*)/.exec(location.search||''); if(mm&&mm[2]){ var picks=decodeURIComponent(mm[2]).split('|').filter(Boolean); if(picks.length){ mhpBootImage(picks, mm[1]==='wish'?'wish':'usage'); return; } } }catch(e){}
+ render();
+})();
 
 </script></body></html>
