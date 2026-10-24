@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V3.4';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V3.5';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4312,8 +4312,13 @@ function mhpResolve(rec){return rec.primary.map(function(p){
 });}
 // 색상: 습관카드 팔레트 재사용(주의#F0503F·보통#D99000·양호#5E9E3E·좋음#17A6B8). macro는 양방향(120>보통 140>주의)
 var MHP_FILL='#17A6B8'; // 유사나로 채워지는 연장분 = '좋음' 색(청록). 식사막대 우측끝을 둥글게 해 구분
-function mhpColor(v,macro){
- if(macro){if(v<40)return '#F0503F';if(v<60)return '#D99000';if(v<80)return '#5E9E3E';if(v<=120)return '#17A6B8';if(v<140)return '#D99000';return '#F0503F';}
+var MEAL_FILL='#8595B8'; // 미량 '식사로 섭취 중인 양' = 중립 슬레이트색(부족=빨강 표시 폐지)
+function mhpColor(v,macro,name){
+ if(macro){
+   if(name==='식이섬유') return v>200?'#D99000':'#5E9E3E';               // 식이섬유는 200%까지 초록(많을수록 좋음)
+   if(name==='단백질')   return v>=150?'#F0503F':v>=120?'#D99000':'#17A6B8'; // 단백질 120%↑주황·150%↑빨강
+   return v>120?'#F0503F':v>100?'#D99000':'#17A6B8';                      // 탄수화물·지방 100%↑주황·120%↑빨강
+ }
  if(v<40)return '#F0503F';if(v<60)return '#D99000';if(v<80)return '#5E9E3E';return '#17A6B8';
 }
 // 애니메이션 막대 (섭취전/후 토글, 오른쪽으로 자람). macro는 200% 스케일+100% 중앙선
@@ -4321,10 +4326,11 @@ function mhpColor(v,macro){
 function mhpBar3(name,before,after,macro){
  before=Math.round(before); after=Math.round(Math.max(before,after)); var scale=macro?200:100;
  var bw=Math.min(100,before/scale*100), ew=Math.max(0,Math.min(100-bw,(after-before)/scale*100)), ext=after-before;
+ var befCol=macro?mhpColor(before,true,name):MEAL_FILL;   // 미량 섭취 전 = '식사로 섭취 중' 중립색
  return '<div class="babar" style="margin:11px 0">'
-  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="bapct" style="font-size:17px;font-weight:800"><span style="color:'+mhpColor(before,macro)+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="bapct" style="font-size:17px;font-weight:800"><span style="color:'+befCol+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
   +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>':'')
-  +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+mhpColor(before,macro)+';border-radius:99px;z-index:2;box-shadow:'+(ext>0?'2.5px 0 0 0 #eef2f0':'none')+'"></div>'
+  +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+befCol+';border-radius:99px;z-index:2;box-shadow:'+(ext>0?'2.5px 0 0 0 #eef2f0':'none')+'"></div>'
   +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:'+MHP_FILL+';border-radius:99px;transition:width .85s cubic-bezier(.25,0,.2,1)"></i>'
   +'</div></div>';
 }
@@ -4350,16 +4356,16 @@ var _mhpGi=50;
 function mhpMacroBar(name,mealV,nutriV){
  mealV=Math.round(mealV); nutriV=Math.round(nutriV);
  var mw=Math.min(100,mealV/200*100);
- return '<div class="mbar" data-meal="'+mealV+'" data-nutri="'+nutriV+'" style="margin:11px 0">'
-  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="mbarpct" style="font-size:17px;font-weight:800;color:'+mhpColor(mealV,true)+'">'+mealV+'%</span></div>'
+ return '<div class="mbar" data-name="'+name+'" data-meal="'+mealV+'" data-nutri="'+nutriV+'" style="margin:11px 0">'
+  +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="mbarpct" style="font-size:17px;font-weight:800;color:'+mhpColor(mealV,true,name)+'">'+mealV+'%</span></div>'
   +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden"><div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>'
-  +'<i class="mbarfill" style="position:absolute;left:0;top:0;bottom:0;width:'+mw+'%;background:'+mhpColor(mealV,true)+';border-radius:99px;transition:width .7s cubic-bezier(.25,0,.2,1),background .4s"></i>'
+  +'<i class="mbarfill" style="position:absolute;left:0;top:0;bottom:0;width:'+mw+'%;background:'+mhpColor(mealV,true,name)+';border-radius:99px;transition:width .7s cubic-bezier(.25,0,.2,1),background .4s"></i>'
   +'</div></div>';
 }
 function mhpMacroMode(mode){
  var nutri=mode==='nutri';
  document.querySelectorAll('#result .mbar').forEach(function(b){
-  var v=+(nutri?b.dataset.nutri:b.dataset.meal), col=mhpColor(v,true);
+  var v=+(nutri?b.dataset.nutri:b.dataset.meal), col=mhpColor(v,true,b.dataset.name);
   var f=b.querySelector('.mbarfill'); if(f){f.style.width=Math.min(100,v/200*100)+'%';f.style.background=col;}
   var p=b.querySelector('.mbarpct'); if(p){p.textContent=v+'%';p.style.color=col;}
  });
@@ -4521,7 +4527,7 @@ function showMHP(){
     var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:19px;margin:17px 0 7px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
     /* --- 02 미량영양소 (섭취 전/후) --- */
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
-    h+='<p class="leg" style="margin:0 0 7px">막대 색 = 지금 충족도 (<span style="color:#F0503F;font-weight:800">부족</span> → <span style="color:#17A6B8;font-weight:800">충분</span>) &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
+    h+='<p class="leg" style="margin:0 0 7px"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MEAL_FILL+';vertical-align:-1px"></span> 식사로 섭취 중인 양 &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
     h+='<div class="segbtns"><button id="gbBefore" class="segbtn" onclick="mhpSetGraph(\'before\')">섭취 전</button><button id="gbAfter" class="segbtn on" onclick="mhpSetGraph(\'after\')">섭취 후</button></div>';
     h+=baGroup('미량영양소',vits.concat(mins),false);
     h+='</div>';
