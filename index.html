@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4578,9 +4578,10 @@ function mhpShareUsage(){
 }
 // ===== 시작 화면 창구: 설문 없이 제품만 골라 섭취방법 안내서 만들기 =====
 var PICK_GROUPS=[
- {h:'마이헬스팩 · 헬스팩',items:['헬스팩','마이헬스팩 (에너지 부스터)','마이헬스팩 (간 건강)','마이헬스팩 (눈 건강)','마이헬스팩 (혈압 건강)','베스트 옵티마이저 팩','면역 건강 팩','체지방 클린 팩','뼈·관절 건강 팩']},
- {h:'대체식 · 드링크 · 가루',items:['뉴트리밀 액티브','화이버지 플러스','FOS 액티브','유기농 곡물 효소','프로바이오틱','코어 아미노 드링크','피지 에너지 드링크','액티브 미네랄 드링크','허브 티 믹스']},
- {h:'개별 영양제',items:['바이오메가','코퀴논 30','마그네칼 D','비타민D','폴리C','부스터 C600','프로후라바놀 C300','헤파실 플러스','비전엑스 디에스','프로코사 글루코사민','프로글루카뮨','e프라임','이소플라본 플러스','메타볼리즘 플러스','알로엔즈 플러스']}
+ {h:'필수영양 (에센셜즈)',items:['마이헬스팩 (에너지 부스터)','마이헬스팩 (간 건강)','마이헬스팩 (눈 건강)','마이헬스팩 (혈압 건강)','헬스팩','베스트 옵티마이저 팩','면역 건강 팩','체지방 클린 팩','뼈·관절 건강 팩']},
+ {h:'체중조절 · 장 건강',items:['뉴트리밀 액티브','화이버지 플러스','FOS 액티브','프로바이오틱']},
+ {h:'개별 영양제 (옵티마이저)',items:['바이오메가','코퀴논 30','마그네칼 D','비타민D','폴리C','부스터 C600','프로후라바놀 C300','헤파실 플러스','비전엑스 디에스','프로코사 글루코사민','프로글루카뮨','e프라임','이소플라본 플러스','메타볼리즘 플러스','알로엔즈 플러스','유기농 곡물 효소']},
+ {h:'드링크',items:['코어 아미노 드링크','피지 에너지 드링크','액티브 미네랄 드링크','허브 티 믹스']}
 ];
 function mhpPickTog(n,btn){ if(!window._pickerSel)window._pickerSel={}; window._pickerSel[n]=!window._pickerSel[n]; var on=window._pickerSel[n]; btn.style.borderColor=on?'#17A6B8':'#e5e9ef'; btn.style.background=on?'#E3F4F6':'#fff'; btn.style.color=on?'#13889A':'#334155'; }
 function mhpUsagePickerOpen(){
