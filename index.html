@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V3.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.0';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4314,7 +4314,7 @@ function mhpResolve(rec){return rec.primary.map(function(p){
 var MHP_FILL='#17A6B8'; // 유사나로 채워지는 연장분 = '좋음' 색(청록). 식사막대 우측끝을 둥글게 해 구분
 function mhpColor(v,macro,name){
  if(macro){
-   if(name==='식이섬유') return v>200?'#D99000':'#5E9E3E';               // 식이섬유는 200%까지 초록(많을수록 좋음)
+   if(name==='식이섬유') return v>=80?'#17A6B8':v>=50?'#E0B000':'#F5820B'; // 식이섬유: 80%↑청록(충분)·50~80 노랑·그이하 주황 (많아도 벌점 없음)
    if(name==='단백질')   return v>=150?'#F0503F':v>=120?'#D99000':'#17A6B8'; // 단백질 120%↑주황·150%↑빨강
    return v>120?'#F0503F':v>100?'#D99000':'#17A6B8';                      // 탄수화물·지방 100%↑주황·120%↑빨강
  }
