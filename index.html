@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.0';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4418,12 +4418,13 @@ function mhpWishlist(){
   +'<div style="text-align:center;margin-bottom:4px"><div style="font-size:12px;font-weight:800;color:var(--teal-d);letter-spacing:.04em">USANA · 맞춤영양 코디</div><div style="font-size:21px;font-weight:900;margin-top:3px">제품 섭취 희망서</div></div>'
   +'<div style="margin:12px 0 2px">'+rows+'</div>'
   +'<div style="border-top:1px solid #eef2f0;margin-top:8px;padding-top:10px;font-size:13px;color:var(--muted);text-align:center">총 '+picks.length+'개</div>'
-  +'<button class="navbtn" style="width:100%;margin-top:12px;background:#17A6B8;color:#fff" onclick="mhpShareWish()">📷 이미지로 저장 · 카톡/문자 공유</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:12px;background:#17A6B8;color:#fff" onclick="mhpDoShare()">📷 이미지로 저장 · 카톡/문자 공유</button>'
   +'<button class="navbtn" style="width:100%;margin-top:9px;background:#1E3A6B;color:#fff" onclick="mhpUsage()">📋 섭취 방법 안내 보기</button>'
   +'<button class="navbtn" style="width:100%;margin-top:9px" onclick="var o=document.getElementById(\'wishOv\');if(o)o.remove()">닫기</button>'
   +'</div>';
  ov.onclick=function(e){if(e.target===ov)ov.remove();};
  document.body.appendChild(ov);
+ mhpShareWish();   // 공유 이미지 미리 준비(클릭 시 즉시 공유)
 }
 // ===== 제품별 섭취 방법 (USANA 제품 라벨 + 사장님 지침 기준) =====
 // 포 기반 마이헬스팩/헬스팩 = 아침 1포·저녁 1포(식사 직후)
@@ -4505,11 +4506,12 @@ function mhpUsage(pickList){
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
   +'<div style="text-align:center;margin-bottom:4px"><div style="font-size:12px;font-weight:800;color:var(--teal-d);letter-spacing:.04em">USANA · 맞춤영양 코디</div><div style="font-size:21px;font-weight:900;margin-top:3px">제품 섭취 방법 안내</div></div>'
   +'<div style="margin-top:10px">'+body+'</div>'
-  +'<button class="navbtn" style="width:100%;margin-top:14px;background:#17A6B8;color:#fff" onclick="mhpShareUsage()">📷 이미지로 저장 · 카톡/문자 공유</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:14px;background:#17A6B8;color:#fff" onclick="mhpDoShare()">📷 이미지로 저장 · 카톡/문자 공유</button>'
   +'<button class="navbtn" style="width:100%;margin-top:9px" onclick="var o=document.getElementById(\'useOv\');if(o)o.remove()">닫기</button>'
   +'</div>';
  ov.onclick=function(e){if(e.target===ov)ov.remove();};
  document.body.appendChild(ov);
+ mhpShareUsage();   // 공유 이미지 미리 준비(클릭 시 즉시 공유)
 }
 // ===== 이미지(PNG) 생성 + 공유(카톡/문자 = 모바일 공유시트) · 미지원 시 다운로드 =====
 function mhpRR(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
@@ -4540,35 +4542,39 @@ function mhpBuildCanvas(spec,imgs){
  ctx.fillStyle='#94A3B8'; ctx.font='22px '+FF; ctx.fillText(spec.footer||'',PAD,totalH-22);
  return cv;
 }
-function mhpShareCanvas(cv,fn,title){
- cv.toBlob(function(blob){
-  if(!blob){ mhpImgFallback(cv,fn); return; }
-  var file=null; try{ file=new File([blob],fn,{type:'image/png'}); }catch(e){}
-  if(file&&navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:title}).catch(function(){mhpImgFallback(cv,fn);}); return; }
-  mhpImgFallback(cv,fn);
- },'image/png');
+// 공유용 이미지를 '미리' 생성(모바일 Web Share는 버튼 클릭 즉시 호출해야 성공 — 생성은 안내서 열 때 선행)
+function mhpPrepShare(spec,names,fn,title){
+ window._shF=null; window._shCv=null; window._shFn=fn; window._shTt=title;
+ var go=function(){ mhpLoadImgs(names).then(function(imgs){ var cv=mhpBuildCanvas(spec,imgs); window._shCv=cv; cv.toBlob(function(b){ if(b){ try{ window._shF=new File([b],fn,{type:'image/png'}); }catch(e){} } },'image/png'); }); };
+ if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go,go);}else go();
+}
+// 공유 버튼 클릭 → 미리 만든 파일로 '즉시' 공유(모바일 공유시트=카톡/문자/사진저장). 미지원이면 이미지 띄워 저장
+function mhpDoShare(){
+ var f=window._shF;
+ if(f&&navigator.canShare&&navigator.canShare({files:[f]})){ navigator.share({files:[f],title:window._shTt}).catch(function(){ if(window._shCv)mhpImgFallback(window._shCv,window._shFn); }); return; }
+ if(window._shCv){ mhpImgFallback(window._shCv,window._shFn); return; }
+ alert('이미지를 준비 중이에요. 잠시 후 다시 눌러 주세요.');
 }
 // 공유(Web Share) 미지원 환경 폴백: 이미지를 띄워 길게 눌러(PC 우클릭) 저장 — 모든 환경에서 작동
 function mhpImgFallback(cv,fn){
  var url=cv.toDataURL('image/png');
  var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.82);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
- ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15px;text-align:center;margin-bottom:10px;max-width:420px">이미지를 길게 눌러(PC는 우클릭) 저장한 뒤<br>카톡·문자로 보내주세요</div>'
+ ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15.5px;text-align:center;margin-bottom:11px;max-width:420px">아래 이미지를 <b>길게 눌러</b><br>\'사진에 저장\' 또는 \'공유\'를 선택하세요</div>'
   +'<img src="'+url+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
-  +'<a href="'+url+'" download="'+fn+'" class="navbtn" style="flex:none;display:block;max-width:420px;width:100%;margin-top:12px;padding:14px 0;text-align:center;text-decoration:none;background:#17A6B8;color:#fff">⬇ 이미지 저장</a>'
-  +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:9px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>';
+  +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>';
  ov.onclick=function(e){if(e.target===ov)ov.remove();};
  document.body.appendChild(ov);
 }
-function mhpGenShare(spec,names,fn,title){ var go=function(){ mhpLoadImgs(names).then(function(imgs){ mhpShareCanvas(mhpBuildCanvas(spec,imgs),fn,title); }); }; if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go,go);}else go(); }
+// 안내서 열 때 호출 — 공유 이미지를 미리 준비(클릭 시 mhpDoShare가 즉시 공유)
 function mhpShareWish(){
  var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
- if(!picks.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
- mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n,p:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
+ if(!picks.length)return;
+ mhpPrepShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n,p:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
 }
 function mhpShareUsage(){
- var secs=mhpUsageSpec(window._usagePicks); if(!secs.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;}
+ var secs=mhpUsageSpec(window._usagePicks); if(!secs.length)return;
  var names=[]; var blocks=secs.map(function(s){ s.items.forEach(function(it){names.push(it.p);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(it){return {name:it.p+(it.amt?' · '+it.amt:''),p:it.p};})}; });
- mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'},names,'섭취방법안내.png','제품 섭취 방법 안내');
+ mhpPrepShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'},names,'섭취방법안내.png','제품 섭취 방법 안내');
 }
 // ===== 시작 화면 창구: 설문 없이 제품만 골라 섭취방법 안내서 만들기 =====
 var PICK_GROUPS=[
