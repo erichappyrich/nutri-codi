@@ -3471,7 +3471,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V3.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V3.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4499,8 +4499,8 @@ function showMHP(){
     var mins=['칼슘','마그네슘','아연','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);   // 철 제외(NutriSearch NR)
     var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000, meals=Math.max(1,+(S.mealsPerDay)||3);
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
-    // 대량영양소 적정(100%) = 미국 기준(DRI/2020-2025 Dietary Guidelines): 단백질 RDA 0.8g/kg, 탄수 AMDR 50%kcal, 지방 AMDR 30%kcal, 식이섬유 14g/1,000kcal
-    var protT=wkg*0.8, carbT=tdee*0.50/4, fatT=tdee*0.30/9, fibT=tdee*14/1000;
+    // 대량영양소 적정(100%) = 최소권장이 아닌 '최적량' 기준: 단백질 1.2g/kg(최적, 최소0.8 아님·근육유지), 탄수 열량의 50%(최적 200~350g 활동량비례), 지방 열량의 30%(최적 20~35%), 식이섬유 14g/1,000kcal
+    var protT=wkg*1.2, carbT=tdee*0.50/4, fatT=tdee*0.30/9, fibT=tdee*14/1000;
     var Pg=M?M.prot:0, Cg=M?M.carb:0, Fg=M?M.fat:0, FBg=M?M.fiber:0;
     var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(200,p100(Cg,carbT)), mFat=Math.min(200,p100(Fg,fatT)), mFib=Math.min(200,p100(FBg,fibT));
     // ★뉴트리밀 대체 모델(최종): 하루 끼니 중 '한 끼(1/meals)'를 뉴트리밀로 통째 교체. 뉴트리밀 1회분 = 단백질24·탄수24·지방6·식이섬유12g. new = 식사×(1-1/meals) + 뉴트리밀. (더 이상 변경 금지 — 가장 단순·정직한 모델)
