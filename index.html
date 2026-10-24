@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V3.5';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V3.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4312,7 +4312,6 @@ function mhpResolve(rec){return rec.primary.map(function(p){
 });}
 // 색상: 습관카드 팔레트 재사용(주의#F0503F·보통#D99000·양호#5E9E3E·좋음#17A6B8). macro는 양방향(120>보통 140>주의)
 var MHP_FILL='#17A6B8'; // 유사나로 채워지는 연장분 = '좋음' 색(청록). 식사막대 우측끝을 둥글게 해 구분
-var MEAL_FILL='#8595B8'; // 미량 '식사로 섭취 중인 양' = 중립 슬레이트색(부족=빨강 표시 폐지)
 function mhpColor(v,macro,name){
  if(macro){
    if(name==='식이섬유') return v>200?'#D99000':'#5E9E3E';               // 식이섬유는 200%까지 초록(많을수록 좋음)
@@ -4321,15 +4320,20 @@ function mhpColor(v,macro,name){
  }
  if(v<40)return '#F0503F';if(v<60)return '#D99000';if(v<80)return '#5E9E3E';return '#17A6B8';
 }
+// ★미량 2존 스케일: 막대 왼쪽 절반(0~50%)=식사 권장량(RDA)까지, 오른쪽 절반(50~100%)=최적(ODI)까지
+function zonePos(x,rda,add){ if(x<=0)return 0; if(rda<=0)rda=(add||100)*0.2; if(x<=rda)return x/rda*50; return Math.min(100,50+(x-rda)/(add||rda)*50); }
+// 색: RDA 50%이하(막대 <25%) 빨강 · RDA까지(25~50%) 주황 · ODI 50%까지(50~75%) 노랑 · ODI 100%까지(75~100%) 청록
+function zoneColor(p){ return p<25?'#F0503F':p<50?'#F5820B':p<75?'#E0B000':'#17A6B8'; }
 // 애니메이션 막대 (섭취전/후 토글, 오른쪽으로 자람). macro는 200% 스케일+100% 중앙선
 // 막대 = 섭취전(색=부족도, 고정) + 초록 연장(유사나로 채워지는 양, 애니메이션으로 자람)
-function mhpBar3(name,before,after,macro){
- before=Math.round(before); after=Math.round(Math.max(before,after)); var scale=macro?200:100;
- var bw=Math.min(100,before/scale*100), ew=Math.max(0,Math.min(100-bw,(after-before)/scale*100)), ext=after-before;
- var befCol=macro?mhpColor(before,true,name):MEAL_FILL;   // 미량 섭취 전 = '식사로 섭취 중' 중립색
+function mhpBar3(name,before,after){
+ before=Math.round(before); after=Math.round(Math.max(before,after));
+ var bw=Math.min(100,Math.max(0,before)), ew=Math.max(0,Math.min(100-bw,after-before)), ext=after-before;
+ var befCol=zoneColor(before);   // 2존 위치에 따른 충족도 색
  return '<div class="babar" style="margin:11px 0">'
   +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px"><span style="font-weight:700;font-size:19px">'+name+'</span><span class="bapct" style="font-size:17px;font-weight:800"><span style="color:'+befCol+'">'+before+'%</span>'+(ext>0?'<span class="baarrow" style="color:'+MHP_FILL+'"> → '+after+'%</span>':'')+'</span></div>'
-  +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'+(macro?'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#AEBAC4;z-index:3"></div>':'')
+  +'<div style="position:relative;height:16px;background:#eef2f0;border-radius:99px;overflow:hidden">'
+  +'<div style="position:absolute;left:50%;top:0;bottom:0;width:2px;background:#C0C9D4;z-index:3"></div>'   // 가운데선 = 식사 권장량(RDA)
   +'<div style="position:absolute;left:0;top:0;bottom:0;width:'+bw+'%;background:'+befCol+';border-radius:99px;z-index:2;box-shadow:'+(ext>0?'2.5px 0 0 0 #eef2f0':'none')+'"></div>'
   +'<i class="baext" data-ew="'+ew+'" style="position:absolute;left:'+bw+'%;top:0;bottom:0;width:0%;background:'+MHP_FILL+';border-radius:99px;transition:width .85s cubic-bezier(.25,0,.2,1)"></i>'
   +'</div></div>';
@@ -4424,11 +4428,99 @@ function mhpWishlist(){
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:420px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
   +'<div style="text-align:center;margin-bottom:4px"><div style="font-size:12px;font-weight:800;color:var(--teal-d);letter-spacing:.04em">USANA · 맞춤영양 코디</div><div style="font-size:21px;font-weight:900;margin-top:3px">제품 섭취 희망서</div></div>'
   +'<div style="margin:12px 0 2px">'+rows+'</div>'
-  +'<div style="border-top:1px solid #eef2f0;margin-top:8px;padding-top:10px;font-size:13px;color:var(--muted);text-align:center">총 '+picks.length+'개 · 이 화면을 캡처해 전달하세요</div>'
-  +'<button class="navbtn" style="width:100%;margin-top:14px" onclick="var o=document.getElementById(\'wishOv\');if(o)o.remove()">닫기</button>'
+  +'<div style="border-top:1px solid #eef2f0;margin-top:8px;padding-top:10px;font-size:13px;color:var(--muted);text-align:center">총 '+picks.length+'개</div>'
+  +'<button class="navbtn" style="width:100%;margin-top:12px;background:#17A6B8;color:#fff" onclick="mhpShareWish()">📷 이미지로 저장 · 카톡/문자 공유</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:9px;background:#1E3A6B;color:#fff" onclick="mhpUsage()">📋 섭취 방법 안내 보기</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:9px" onclick="var o=document.getElementById(\'wishOv\');if(o)o.remove()">닫기</button>'
   +'</div>';
  ov.onclick=function(e){if(e.target===ov)ov.remove();};
  document.body.appendChild(ov);
+}
+// ===== 제품별 섭취 방법 매핑 (사장님 안내 기준) =====
+// 1=기상후/식사직후 1포(유산균) · 2=식사전 물에 타서(식이섬유 가루) · 3=식사 대신 물300~350㎖(대체식) · 4=식사 중·직후 물과 함께(대부분 영양제, 마이헬스팩/헬스팩=아침1포·저녁1포) · 5=음료·제품별 안내
+function mhpUseMethod(n){
+ if(/프로바이오틱/.test(n))return 1;
+ if(/화이버지|FOS/.test(n))return 2;
+ if(/뉴트리밀/.test(n))return 3;
+ if(/피지|허브|미네랄 드링크|서큘레이트/.test(n))return 5;
+ return 4;
+}
+function mhpUsageSpec(){
+ var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
+ var g={1:[],2:[],3:[],4:[],5:[]}; picks.forEach(function(n){g[mhpUseMethod(n)].push(n);});
+ var secs=[];
+ if(g[3].length)secs.push({ic:'🥤',h:'식사 대신 (대체식)',t:'하루 한 끼 대신, 낱개 1포(또는 3스푼)를 물 300~350㎖에 충분히 섞어 드세요. 섞은 뒤엔 가능한 빨리 드세요.',items:g[3]});
+ if(g[2].length)secs.push({ic:'🍽️',h:'식사 전',t:'식사 30분 전~직전, 1스푼을 물에 타서(또는 음식에 뿌려) 드세요. 뉴트리밀과 함께 타 드셔도 좋아요. 섞은 뒤엔 가능한 빨리 드세요.',items:g[2]});
+ if(g[4].length)secs.push({ic:'🌅',h:'아침·저녁 식사 중 또는 직후 (물과 함께)',t:'마이헬스팩·헬스팩은 아침 1포, 저녁 1포. 그 외 영양제도 식사 중·직후 물과 함께 드세요.',items:g[4]});
+ if(g[1].length)secs.push({ic:'☀️',h:'아침 기상 후 또는 식사 직후',t:'물과 함께 1포 드세요.',items:g[1]});
+ if(g[5].length)secs.push({ic:'🧃',h:'음료 · 기타',t:'제품에 안내된 방법대로 드세요.',items:g[5]});
+ return secs;
+}
+// 섭취 방법 안내 오버레이
+function mhpUsage(){
+ var secs=mhpUsageSpec();
+ if(!secs.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
+ var body=secs.map(function(s){
+  var items=s.items.map(function(n){var img=prodImg(n);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+n+'</span></div>';}).join('');
+  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div><div class="leg" style="margin:4px 0 2px">'+s.t+'</div>'+items+'</div>';
+ }).join('');
+ var ov=document.createElement('div'); ov.id='useOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 14px';
+ ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+  +'<div style="text-align:center;margin-bottom:4px"><div style="font-size:12px;font-weight:800;color:var(--teal-d);letter-spacing:.04em">USANA · 맞춤영양 코디</div><div style="font-size:21px;font-weight:900;margin-top:3px">제품 섭취 방법 안내</div></div>'
+  +'<div style="margin-top:10px">'+body+'</div>'
+  +'<button class="navbtn" style="width:100%;margin-top:14px;background:#17A6B8;color:#fff" onclick="mhpShareUsage()">📷 이미지로 저장 · 카톡/문자 공유</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:9px" onclick="var o=document.getElementById(\'useOv\');if(o)o.remove()">닫기</button>'
+  +'</div>';
+ ov.onclick=function(e){if(e.target===ov)ov.remove();};
+ document.body.appendChild(ov);
+}
+// ===== 이미지(PNG) 생성 + 공유(카톡/문자 = 모바일 공유시트) · 미지원 시 다운로드 =====
+function mhpRR(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function mhpLoadImgs(names){
+ return Promise.all(names.map(function(n){ return new Promise(function(res){ var src=prodImg(n); if(!src){res([n,null]);return;} var im=new Image(); im.onload=function(){res([n,im]);}; im.onerror=function(){res([n,null]);}; im.src=src; }); })).then(function(ps){ var m={}; ps.forEach(function(p){m[p[0]]=p[1];}); return m; });
+}
+function mhpBuildCanvas(spec,imgs){
+ var W=760, PAD=44, FF='"Noto Sans KR","Malgun Gothic",sans-serif';
+ var cv=document.createElement('canvas'); cv.width=W; var ctx=cv.getContext('2d');
+ function wrap(txt,maxw,font){ ctx.font=font; var lines=[],cur=''; for(var i=0;i<txt.length;i++){ var t=cur+txt[i]; if(ctx.measureText(t).width>maxw && cur){lines.push(cur);cur=txt[i];}else cur=t; } if(cur)lines.push(cur); return lines; }
+ var HEADER=168, y=HEADER+30, plan=[];
+ (spec.blocks||[]).forEach(function(bl){
+  if(bl.header){ plan.push({t:'h',txt:(bl.ic?bl.ic+' ':'')+bl.header,y:y}); y+=44; }
+  if(bl.note){ wrap(bl.note,W-PAD*2,'24px '+FF).forEach(function(l){plan.push({t:'note',txt:l,y:y}); y+=31;}); y+=6; }
+  (bl.items||[]).forEach(function(it){ plan.push({t:'item',name:it.name,img:imgs[it.name],y:y}); y+=62; });
+  y+=14;
+ });
+ var totalH=y+56; cv.height=totalH; ctx=cv.getContext('2d');
+ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,totalH);
+ var gr=ctx.createLinearGradient(0,0,W,HEADER); gr.addColorStop(0,'#1E3A6B'); gr.addColorStop(1,'#17A6B8'); ctx.fillStyle=gr; ctx.fillRect(0,0,W,HEADER);
+ ctx.fillStyle='rgba(255,255,255,.88)'; ctx.font='700 22px '+FF; ctx.fillText(spec.subtitle||'',PAD,64);
+ ctx.fillStyle='#fff'; ctx.font='900 46px '+FF; ctx.fillText(spec.title||'',PAD,122);
+ plan.forEach(function(p){
+  if(p.t==='h'){ ctx.fillStyle='#17364f'; ctx.font='800 29px '+FF; ctx.fillText(p.txt,PAD,p.y+28); }
+  else if(p.t==='note'){ ctx.fillStyle='#5B6B82'; ctx.font='24px '+FF; ctx.fillText(p.txt,PAD,p.y+20); }
+  else if(p.t==='item'){ var iy=p.y, S2=48; if(p.img){ ctx.save(); mhpRR(ctx,PAD,iy,S2,S2,11); ctx.clip(); ctx.drawImage(p.img,PAD,iy,S2,S2); ctx.restore(); ctx.strokeStyle='#E3E8EF'; ctx.lineWidth=1; mhpRR(ctx,PAD,iy,S2,S2,11); ctx.stroke(); } else { ctx.fillStyle='#E9EEF8'; mhpRR(ctx,PAD,iy,S2,S2,11); ctx.fill(); } ctx.fillStyle='#1E2A3A'; ctx.font='700 27px '+FF; ctx.fillText(p.name,PAD+S2+16,iy+33); }
+ });
+ ctx.fillStyle='#94A3B8'; ctx.font='22px '+FF; ctx.fillText(spec.footer||'',PAD,totalH-22);
+ return cv;
+}
+function mhpShareCanvas(cv,fn,title){
+ cv.toBlob(function(blob){
+  if(!blob){alert('이미지 생성에 실패했어요.');return;}
+  var file=new File([blob],fn,{type:'image/png'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){ navigator.share({files:[file],title:title}).catch(function(){}); }
+  else{ var url=URL.createObjectURL(blob); var a=document.createElement('a'); a.href=url; a.download=fn; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(url);},1500); alert('이 기기에서는 바로 공유가 안 돼 이미지로 저장했어요. 저장된 이미지를 카톡·문자로 보내주세요.'); }
+ },'image/png');
+}
+function mhpGenShare(spec,names,fn,title){ var go=function(){ mhpLoadImgs(names).then(function(imgs){ mhpShareCanvas(mhpBuildCanvas(spec,imgs),fn,title); }); }; if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go,go);}else go(); }
+function mhpShareWish(){
+ var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
+ if(!picks.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
+ mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
+}
+function mhpShareUsage(){
+ var secs=mhpUsageSpec(); if(!secs.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
+ var names=[]; var blocks=secs.map(function(s){ s.items.forEach(function(n){names.push(n);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(n){return {name:n};})}; });
+ mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'},names,'섭취방법안내.png','제품 섭취 방법 안내');
 }
 // 생활습관 개선 조언 (예전 리포트의 '먼저 이것부터' + '관심분야 케어' 복원)
 var LSX={
@@ -4505,7 +4597,7 @@ function showMHP(){
     var warn=[]; if(exSet.omega3&&(v.meds||[]).some(function(m){return m.indexOf('항응고제')>=0;}))warn.push('오메가3 ↔ 항응고제');
     if((usanaAbs['칼슘']||0)>0&&(v.health||[]).indexOf('콩팥병')>=0)warn.push('칼슘·마그네슘 ↔ 콩팥병');
     /* ===== 02 섭취 전 → 후 그래프 (100%=필요량=식사RDA+뉴트리서치ODI, 전·후 같은 잣대) ===== */
-    var nutBA=function(k){ var t=nsTarget(k); if(!t)return null; var bef=dietAbs(k)/t*100, aft=afterPct(k); return {n:k,b:Math.round(Math.min(100,bef)),a:Math.round(Math.min(100,Math.max(bef,aft)))}; };
+    var nutBA=function(k){ var rda=KREF[k]||0, add=NS_ODI[k]||0; if(rda+add<=0)return null; var bAbs=dietAbs(k), aAbs=dietAbs(k)+(usanaAbs[k]||0); var b=zonePos(bAbs,rda,add), a=zonePos(aAbs,rda,add); return {n:k,b:Math.round(b),a:Math.round(Math.max(b,a))}; };   // 2존 위치로 변환
     var vits=['비타민C','비타민D','비타민A','비타민E','비타민K','비타민B1','비타민B2','나이아신','판토텐산','비타민B6','비오틴','엽산','비타민B12'].map(nutBA).filter(Boolean);
     var mins=['칼슘','마그네슘','아연','셀렌','구리','망간','요오드','크롬','몰리브덴'].map(nutBA).filter(Boolean);   // 철 제외(NutriSearch NR)
     var age=+v.age||40, wkg=+v.weight||+S.weight||65, tdee=(M&&M.tdee)?M.tdee:2000, meals=Math.max(1,+(S.mealsPerDay)||3);
@@ -4520,14 +4612,14 @@ function showMHP(){
     var fishSig=0; try{(S.basket||[]).concat(S.nightBasket||[]).forEach(function(nm){if(/생선|고등어|연어|참치|회|조림|멸치|꽁치|삼치/.test(nm))fishSig++;});}catch(e){}
     // 오메가3(EPA+DHA): 필요량=뉴트리서치 1,141㎎. 식사=생선 기반, 유사나=바이오메가 ~1,050㎎
     var o3Diet=50+fishSig*150, o3T=1141, o3U=exSet.omega3?1050:0;
-    mins.push({n:'필수지방산(오메가3)',b:Math.round(Math.min(100,o3Diet/o3T*100)),a:Math.round(Math.min(100,(o3Diet+o3U)/o3T*100))});
+    var o3rda=300; mins.push({n:'필수지방산(오메가3)',b:Math.round(zonePos(o3Diet,o3rda,o3T-o3rda)),a:Math.round(zonePos(o3Diet+o3U,o3rda,o3T-o3rda))});
     // 코엔자임Q10: 필요량=평균 식사분 + 90㎎(최적 보충). 식사분은 나이들수록↓. 유사나=코퀴논 90㎎
     var coqDiet=Math.max(5,Math.round(30-Math.max(0,age-30)*0.5)), coqT=coqDiet+90, coqU=exSet.coq10?90:0;
-    mins.push({n:'코엔자임Q10',b:Math.round(coqDiet/coqT*100),a:Math.round(Math.min(100,(coqDiet+coqU)/coqT*100))});
+    mins.push({n:'코엔자임Q10',b:Math.round(zonePos(coqDiet,coqDiet,90)),a:Math.round(zonePos(coqDiet+coqU,coqDiet,90))});
     var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:19px;margin:17px 0 7px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
     /* --- 02 미량영양소 (섭취 전/후) --- */
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
-    h+='<p class="leg" style="margin:0 0 7px"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MEAL_FILL+';vertical-align:-1px"></span> 식사로 섭취 중인 양 &nbsp;·&nbsp; <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
+    h+='<p class="leg" style="margin:0 0 7px">막대 색 = 충족도(<span style="color:#F0503F;font-weight:800">부족</span>→<span style="color:#17A6B8;font-weight:800">충분</span>) · 가운데 선 = 식사 권장량 · <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
     h+='<div class="segbtns"><button id="gbBefore" class="segbtn" onclick="mhpSetGraph(\'before\')">섭취 전</button><button id="gbAfter" class="segbtn on" onclick="mhpSetGraph(\'after\')">섭취 후</button></div>';
     h+=baGroup('미량영양소',vits.concat(mins),false);
     h+='</div>';
