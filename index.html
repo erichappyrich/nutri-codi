@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3489,18 +3489,8 @@ P({tier:'both',title:'',sub:'',render:()=>`
     <svg class="hbrand-wave" viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0,24 C70,6 130,6 200,20 C270,34 330,34 400,16 L400,40 L0,40 Z" fill="var(--bg)"/></svg>
   </div>
   <p class="herotag">몇 가지만 골라주시면 영양 상태를 정리해 드려요.<br>약 5분이면 끝나요.</p>
-  <label class="ck master"><input type="checkbox" ${(S.consent.service&&S.consent.statistics)?'checked':''} onchange="S.consent.service=this.checked;S.consent.statistics=this.checked;upd()"> <b>전체 동의</b></label>
-  <div class="subck">
-    <label class="ck small"><input type="checkbox" ${S.consent.service?'checked':''} onchange="S.consent.service=this.checked;upd()"> <span><b>(필수)</b> 개인정보 수집 및 결과의 의뢰인 전달</span></label>
-    <label class="ck small"><input type="checkbox" ${S.consent.statistics?'checked':''} onchange="S.consent.statistics=this.checked;upd()"> <span>(선택) 가명처리 데이터의 통계·서비스 개선 활용</span></label>
-  </div>
-  <p class="reassure">🔒 영양 코디 외 다른 목적으로는 사용하지 않아요.</p>
-  <button class="link" onclick="S.showTerms=!S.showTerms;upd()">${S.showTerms?'수집 항목 자세히 닫기 ▲':'수집 항목 자세히 보기 ▼'}</button>
-  ${S.showTerms?`<div class="terms">
-    · 수집 항목: 성명(또는 별칭)·성별·나이·키·체중·식사·생활습관·관심분야 (선택 입력 시 건강·질환·복용약 등 민감정보)<br>
-    · 이용 목적: 개인 맞춤 영양 분석<br>
-    · 제3자 제공: 회원님께 설문을 요청한 <b>영양 코디 의뢰인</b>에게 <b>분석 결과</b>를 전달 (목적: 맞춤 영양 코디)<br>
-    · 보관: 관련 법령·서비스 기준에 따라 보관 후 파기</div>`:''}<div style="margin-top:22px;padding-top:17px;border-top:1px solid var(--line)">
+  <div style="background:#F4F8F6;border-radius:12px;padding:13px 15px;margin-top:4px"><p class="reassure" style="margin:0">🔒 입력하신 내용은 <b>이 기기에서 분석에만</b> 쓰이고 어디에도 <b>저장·전송되지 않아요.</b></p><p class="leg" style="margin:5px 0 0">결과는 직접 '이미지 저장·공유'를 누르실 때만 전달돼요.</p></div>
+  <div style="margin-top:22px;padding-top:17px;border-top:1px solid var(--line)">
     <button onclick="mhpUsagePickerOpen()" style="position:relative;width:100%;border:none;border-radius:17px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#1E3A6B 0%,#245C8E 52%,#199CB0 100%);box-shadow:0 9px 24px rgba(20,50,90,.24);display:flex;align-items:center;gap:13px;text-align:left;padding:16px 17px">
       <span style="flex:none;width:46px;height:46px;border-radius:13px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${UIICONS.pill||''}" style="width:100%;height:100%;object-fit:cover" alt=""></span>
       <span style="flex:1;min-width:0">
@@ -3511,7 +3501,7 @@ P({tier:'both',title:'',sub:'',render:()=>`
     </button>
   </div>
   <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:18px;letter-spacing:.3px">버전 ${APPVER}</div>`,
-  valid:()=>S.consent.service});
+  valid:()=>true});
 
 /* ===== 심플 3화면 (밀도형) ===== */
 function sq(key,label,opts,ic){return `<div class="sqbox"><div class="sqlbl">${ic?`<span class="sqic">${ic}</span>`:''}<span>${label}</span></div><div class="sqopts">`+opts.map(o=>`<button class="sqbtn ${S.simple[key]===o[0]?'on':''}" onclick="S.simple['${key}']='${o[0]}';upd()">${o[1]}</button>`).join('')+`</div></div>`;}
@@ -3694,15 +3684,11 @@ P({show:()=>false,title:'종합영양제를 드시나요?',sub:'월 기준 금�
 
 /* 17. 질환·약 */
 P({title:'앓는 병이나 복용 약이 있나요?',sub:'질병을 진단·처방하려는 게 아니에요. 약과 함께 피해야 할 영양제를 거르고, 질환으로 생기는 영양 손실을 반영하려고 여쭤봐요. 해당되는 것만 골라주세요.',render:()=>{
-  const picked=(S.health&&S.health.length)||(S.meds&&S.meds.length);
   return `
   <div class="lbl">건강 특이사항</div><div class="hmgrid">${multi(Object.keys(DATA.safety.health),'health')}</div>
   <div class="lbl">복용 중인 약</div><div class="hmgrid">${multi(Object.keys(DATA.safety.meds),'meds')}</div>
-  ${picked?`<div style="background:#FFF7E8;border:1px solid #F0DBA8;border-radius:11px;padding:13px 14px;margin-top:14px">
-    <p class="muted" style="font-size:12.5px;line-height:1.65;margin:0 0 10px">🔒 건강 상태·복용 약은 <b>민감정보</b>예요. 더 정확한 영양 안내에만 쓰이고, 분석 결과와 함께 <b>의뢰인에게 전달</b>돼요.</p>
-    <label class="ck small" style="align-items:flex-start"><input type="checkbox" ${S.consent.sensitive?'checked':''} onchange="S.consent.sensitive=this.checked;upd()"> <span><b>(필수)</b> 위 <b>민감정보(건강·질환·복용약)</b>의 수집·활용·의뢰인 전달에 동의합니다.</span></label>
-   </div>`:`<p class="muted" style="font-size:12px;line-height:1.65;margin-top:14px;background:#F4F8F6;border-radius:10px;padding:11px 13px">🔒 건강 상태·복용 약은 <b>민감정보</b>라 선택 시 별도 동의를 받아요. <b>비워두고 넘어가셔도</b> 결과는 받아보실 수 있어요.</p>`}`;
-  },valid:()=>{const picked=(S.health&&S.health.length)||(S.meds&&S.meds.length);return !picked || !!S.consent.sensitive;}});
+  <p class="muted" style="font-size:12px;line-height:1.65;margin-top:14px;background:#F4F8F6;border-radius:10px;padding:11px 13px">🔒 건강 상태·복용 약은 <b>약과 함께 피해야 할 영양제를 거르는 용도로만</b> 이 기기에서 쓰이고, 어디에도 <b>저장되지 않아요.</b> 해당 없으면 비워두셔도 돼요.</p>`;
+  },valid:()=>true});
 
 /* 17b. 임신·수유 (만 45세 이하 여성만 표시) */
 P({title:'임신·수유 중이신가요?',sub:'해당되는 것을 골라주세요. 영양 권장이 달라져요.',show:()=>S.sex==='f'&&age()<=45,render:()=>`
