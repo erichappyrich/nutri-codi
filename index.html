@@ -186,7 +186,7 @@ select.big{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xm
 .searchbox{display:flex;align-items:center;gap:9px;border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;background:#F4F7FA;font-size:15px;color:#9AA6B2;box-shadow:var(--shadow-sm)}
 .searchbox input{border:none;background:none;flex:1;font-size:15px;outline:none}
 /* 네비 */
-.navbar{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;display:flex;gap:11px;padding:13px 18px calc(13px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(20,40,60,.05)}
+.navbar{position:fixed;bottom:0;left:0;right:0;max-width:430px;margin:0 auto;display:flex;flex-wrap:wrap;gap:11px;padding:13px 18px calc(13px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);box-shadow:0 -2px 12px rgba(20,40,60,.05)}
 .navbtn{flex:1;padding:16px;border:none;border-radius:15px;background:var(--teal);color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(14,124,102,.3);transition:.15s;letter-spacing:.3px}
 .navbtn:active{transform:translateY(1px)}
 .navbtn:disabled{background:#B6C7CE;box-shadow:none}
@@ -445,7 +445,7 @@ h1#ttl{font-size:31px!important;line-height:1.28!important}
 <div class="topbar"><button onclick="prev()">‹</button><div class="progwrap"><div class="prog" id="prog"></div></div><span class="stepno" id="stepno"></span></div>
 <div id="survey"><h1 id="ttl"></h1><p id="sub"></p><div id="body"></div></div>
 <div id="result"></div>
-<div class="navbar" id="navbar"><button class="navbtn" id="prevb" onclick="prev()">이전</button><button class="navbtn" id="next" onclick="next()">다음</button></div>
+<div class="navbar" id="navbar"><button class="navbtn" id="prevb" onclick="prev()">이전</button><button class="navbtn" id="next" onclick="next()">다음</button><button id="startUsageBtn" onclick="mhpUsagePickerOpen()" style="display:none;flex:0 0 100%;width:100%;border:none;border-radius:15px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#1E3A6B 0%,#245C8E 52%,#199CB0 100%);box-shadow:0 5px 15px rgba(20,50,90,.2);align-items:center;gap:12px;text-align:left;padding:12px 14px"><span style="flex:none;width:42px;height:42px;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center"><img id="startUsageImg" src="" style="width:100%;height:100%;object-fit:cover" alt=""></span><span style="flex:1;min-width:0"><span style="display:block;color:#fff;font-size:15.5px;font-weight:800;letter-spacing:-.2px">유사나 영양제 섭취방법 안내서</span><span style="display:block;color:#CDE6F0;font-size:12px;font-weight:500;margin-top:2px">설문 없이 제품만 골라 바로 만들기</span></span><span style="flex:none;color:#fff;font-size:20px;opacity:.8;font-weight:300">›</span></button></div>
 </div>
 <script>
 const DATA={
@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.0';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3490,17 +3490,7 @@ P({tier:'both',title:'',sub:'',render:()=>`
   </div>
   <p class="herotag">몇 가지만 골라주시면 영양 상태를 정리해 드려요.<br>약 5분이면 끝나요.</p>
   <div style="background:#F4F8F6;border-radius:12px;padding:13px 15px;margin-top:4px"><p class="reassure" style="margin:0">🔒 입력하신 내용은 <b>이 기기에서 분석에만</b> 쓰이고 어디에도 <b>저장·전송되지 않아요.</b></p><p class="leg" style="margin:5px 0 0">결과는 직접 '이미지 저장·공유'를 누르실 때만 전달돼요.</p></div>
-  <div style="margin-top:22px;padding-top:17px;border-top:1px solid var(--line)">
-    <button onclick="mhpUsagePickerOpen()" style="position:relative;width:100%;border:none;border-radius:17px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#1E3A6B 0%,#245C8E 52%,#199CB0 100%);box-shadow:0 9px 24px rgba(20,50,90,.24);display:flex;align-items:center;gap:13px;text-align:left;padding:16px 17px">
-      <span style="flex:none;width:46px;height:46px;border-radius:13px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center"><img src="${UIICONS.pill||''}" style="width:100%;height:100%;object-fit:cover" alt=""></span>
-      <span style="flex:1;min-width:0">
-        <span style="display:block;color:#fff;font-size:16.5px;font-weight:800;letter-spacing:-.2px">유사나 영양제 섭취방법 안내서</span>
-        <span style="display:block;color:#CDE6F0;font-size:12.5px;font-weight:500;margin-top:3px">설문 없이 제품만 골라 바로 만들기</span>
-      </span>
-      <span style="flex:none;color:#fff;font-size:22px;opacity:.8;font-weight:300">›</span>
-    </button>
-  </div>
-  <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:18px;letter-spacing:.3px">버전 ${APPVER}</div>`,
+  <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:20px;letter-spacing:.3px">버전 ${APPVER}</div>`,
   valid:()=>true});
 
 /* ===== 심플 3화면 (밀도형) ===== */
@@ -3931,7 +3921,10 @@ function render(){
   else if(step===a.length-1) lbl='제출하기 →';
   $('next').textContent=lbl;
   $('next').disabled=!st.valid();   // 모든 항목 선택 시 활성 (스크롤 조건 없음)
-  const pb=$('prevb'); if(pb) pb.style.visibility=step===0?'hidden':'visible';
+  const pb=$('prevb'); if(pb){ pb.style.display=step===0?'none':''; pb.style.visibility='visible'; }   // 시작화면엔 '이전' 숨겨 '다음'을 꽉 차게
+  // 시작 화면에서만 '섭취방법 안내서' 버튼을 다음 버튼 아래(고정바 안)에 표시
+  const sb=$('startUsageBtn'); if(sb){ sb.style.display=step===0?'flex':'none'; const si=$('startUsageImg'); if(si&&!si.getAttribute('src'))si.src=(typeof UIICONS!=='undefined'&&UIICONS.pill)?UIICONS.pill:''; }
+  const sv=$('survey'); if(sv) sv.style.paddingBottom=step===0?'190px':'110px';
 }
 function upd(){render();}
 function next(){
