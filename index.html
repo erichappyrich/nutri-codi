@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3500,9 +3500,15 @@ P({tier:'both',title:'',sub:'',render:()=>`
     · 수집 항목: 성명(또는 별칭)·성별·나이·키·체중·식사·생활습관·관심분야 (선택 입력 시 건강·질환·복용약 등 민감정보)<br>
     · 이용 목적: 개인 맞춤 영양 분석<br>
     · 제3자 제공: 회원님께 설문을 요청한 <b>영양 코디 의뢰인</b>에게 <b>분석 결과</b>를 전달 (목적: 맞춤 영양 코디)<br>
-    · 보관: 관련 법령·서비스 기준에 따라 보관 후 파기</div>`:''}<div style="margin-top:20px;padding-top:15px;border-top:1px solid var(--line)">
-    <button class="navbtn" style="width:100%;background:#fff;color:#1E3A6B;border:1.5px solid #1E3A6B;box-shadow:none;font-weight:800" onclick="mhpUsagePickerOpen()">💊 유사나 영양제 섭취방법 안내서</button>
-    <p class="leg" style="text-align:center;margin-top:6px">설문 없이 제품만 골라 섭취 방법을 바로 만들어요</p>
+    · 보관: 관련 법령·서비스 기준에 따라 보관 후 파기</div>`:''}<div style="margin-top:22px;padding-top:17px;border-top:1px solid var(--line)">
+    <button onclick="mhpUsagePickerOpen()" style="position:relative;width:100%;border:none;border-radius:17px;overflow:hidden;cursor:pointer;background:linear-gradient(135deg,#1E3A6B 0%,#245C8E 52%,#199CB0 100%);box-shadow:0 9px 24px rgba(20,50,90,.24);display:flex;align-items:center;gap:13px;text-align:left;padding:16px 17px">
+      <span style="flex:none;width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.17);display:flex;align-items:center;justify-content:center;font-size:24px">💊</span>
+      <span style="flex:1;min-width:0">
+        <span style="display:block;color:#fff;font-size:16.5px;font-weight:800;letter-spacing:-.2px">유사나 영양제 섭취방법 안내서</span>
+        <span style="display:block;color:#CDE6F0;font-size:12.5px;font-weight:500;margin-top:3px">설문 없이 제품만 골라 바로 만들기</span>
+      </span>
+      <span style="flex:none;color:#fff;font-size:22px;opacity:.8;font-weight:300">›</span>
+    </button>
   </div>
   <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:18px;letter-spacing:.3px">버전 ${APPVER}</div>`,
   valid:()=>S.consent.service});
