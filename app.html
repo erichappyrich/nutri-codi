@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.4';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.5';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4551,21 +4551,31 @@ function mhpPrepShare(spec,names,fn,title){
 // 공유 버튼 클릭 → 미리 만든 파일로 '즉시' 공유(모바일 공유시트=카톡/문자/사진저장). 미지원이면 이미지 띄워 저장
 function mhpDoShare(){
  var f=window._shF;
- if(f&&navigator.canShare&&navigator.canShare({files:[f]})){ navigator.share({files:[f],title:window._shTt}).catch(function(err){ if(err&&err.name==='AbortError')return; if(window._shCv)mhpImgFallback(window._shCv,window._shFn); }); return; }
+ if(f&&navigator.share&&(!navigator.canShare||navigator.canShare({files:[f]}))){
+   try{ navigator.share({files:[f],title:window._shTt}).catch(function(err){ if(err&&err.name==='AbortError')return; mhpImgFallback(window._shCv,window._shFn); }); return; }catch(e){}
+ }
  if(window._shCv){ mhpImgFallback(window._shCv,window._shFn); return; }
  alert('이미지를 준비 중이에요. 잠시 후 다시 눌러 주세요.');
 }
-// 공유(Web Share) 미지원 폴백: 이미지를 띄워 길게 눌러 저장 + '새 창에서 열기'(인앱 브라우저 대비)
+// 공유(Web Share) 미지원·인앱브라우저 폴백 (미리 만든 파일 재사용으로 즉시 표시)
 function mhpImgFallback(cv,fn){
- var url=cv.toDataURL('image/png');
- window._mhpOpenImg=function(){ try{ var u=url; if(window._shF){ try{u=URL.createObjectURL(window._shF);}catch(e){} } var w=window.open(u,'_blank'); if(!w){ location.href=u; } }catch(e){ try{window.open(url,'_blank');}catch(e2){} } };
- var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.86);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
- ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15.5px;text-align:center;margin-bottom:11px;max-width:420px">아래 이미지를 <b>길게 눌러</b> \'사진에 저장\'<br><span style="font-weight:500;font-size:13.5px;color:#cdd8ea">잘 안 되면 아래 \'새 창에서 열기\'를 누른 뒤 저장하세요</span></div>'
-  +'<img src="'+url+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
-  +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#17A6B8;color:#fff" onclick="window._mhpOpenImg&&window._mhpOpenImg()">🔗 새 창에서 이미지 열기</button>'
-  +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:9px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>';
- ov.onclick=function(e){if(e.target===ov)ov.remove();};
- document.body.appendChild(ov);
+ (function(){
+  var durl=cv.toDataURL('image/png'); var burl=durl; try{ if(window._shF)burl=URL.createObjectURL(window._shF); }catch(e){}
+  window._mhpBurl=burl;
+  var ua=navigator.userAgent||''; var isKakao=/KAKAOTALK/i.test(ua);
+  var diag='share:'+(navigator.share?'Y':'N')+' · canShare:'+(navigator.canShare?'Y':'N')+' · file:'+(window._shF?'Y':'N')+' · '+(isKakao?'KAKAO':(/Instagram|FBAN|FBAV|NAVER|Line/i.test(ua)?'인앱':(/CriOS|Chrome/i.test(ua)?'크롬':(/Safari/i.test(ua)?'사파리':'기타'))));
+  var tip=isKakao
+   ? '<b style="color:#FFD84D">카톡 안에서는 저장이 막혀 있어요.</b><br><span style="font-weight:600;font-size:13.5px;color:#eef2f8">우측 상단 <b>⋮</b> → <b>\'다른 브라우저로 열기\'</b> 후 다시 하면 공유가 됩니다.</span>'
+   : '이미지를 <b>길게 눌러</b> \'사진에 저장\'<br><span style="font-weight:500;font-size:13px;color:#cdd8ea">안 되면 아래 <b>전체화면으로 보기</b>를 누르세요(길게눌러 저장·스크린샷)</span>';
+  var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.9);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
+  ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15px;text-align:center;margin-bottom:11px;max-width:420px;line-height:1.55">'+tip+'</div>'
+   +'<img src="'+durl+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
+   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#17A6B8;color:#fff" onclick="if(window._mhpBurl)location.href=window._mhpBurl">🖼️ 전체화면으로 보기</button>'
+   +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:9px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>'
+   +'<div style="color:#7f8ca6;font-size:10.5px;margin-top:12px;text-align:center;letter-spacing:.2px">'+diag+'</div>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+ })();
 }
 // 안내서 열 때 호출 — 공유 이미지를 미리 준비(클릭 시 mhpDoShare가 즉시 공유)
 function mhpShareWish(){
