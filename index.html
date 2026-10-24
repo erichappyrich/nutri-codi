@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.3';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4462,8 +4462,8 @@ var USAGE={
  '허브 티 믹스':{special:'tea'}
 };
 var USE_SECT=[
- {k:'meal',ic:'🥤',h:'식사 대신 (대체식)',t:'하루 한 끼 대신, 낱개 1포(또는 3스푼)를 물 300~350㎖에 충분히 섞어 드세요. 섞은 뒤엔 가능한 빨리.'},
- {k:'premeal',ic:'🍽️',h:'식사 30분 전 ~ 직전',t:'1스푼을 물에 타서(또는 음식에 뿌려) 드세요. 뉴트리밀과 함께 타 드셔도 좋아요. 섞은 뒤엔 가능한 빨리.'},
+ {k:'meal',ic:'🥤',h:'식사 대신 (대체식)',t:'하루 한 끼 대신, 낱개 1포(또는 3스푼)를 물 300~350㎖에 충분히 섞어 드세요. 섞은 뒤엔 가능한 빨리 드세요.'},
+ {k:'premeal',ic:'🍽️',h:'식사 30분 전 ~ 직전',t:'1스푼을 물에 타서(또는 음식에 뿌려) 드세요. 뉴트리밀과 함께 타 드셔도 좋아요. 섞은 뒤엔 가능한 빨리 드세요.'},
  {k:'wake',ic:'☀️',h:'아침 기상 후 또는 식사 직후',t:'물과 함께 1포 드세요.'},
  {k:'아침 식사 직후',ic:'🌅',h:'아침 식사 직후 (물과 함께)',t:''},
  {k:'편한 시간에',ic:'🕐',h:'편한 시간에',t:''},
@@ -4499,8 +4499,8 @@ function mhpUsage(pickList){
  var secs=mhpUsageSpec(pickList);
  if(!secs.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;}
  var body=secs.map(function(s){
-  var items=s.items.map(function(it){var img=prodImg(it.p);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+it.p+(it.amt?' <span style="color:var(--muted);font-weight:600">· '+it.amt+'</span>':'')+'</span></div>';}).join('');
-  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div>'+(s.t?'<div class="leg" style="margin:4px 0 2px">'+s.t+'</div>':'')+items+'</div>';
+  var items=s.items.map(function(it){var img=prodImg(it.p);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+it.p+(it.amt?' <span style="color:var(--muted);font-weight:600;font-size:13.5px">· '+it.amt+'</span>':'')+'</span></div>';}).join('');
+  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div>'+(s.t?'<div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin:5px 0 3px">'+s.t+'</div>':'')+items+'</div>';
  }).join('');
  var ov=document.createElement('div'); ov.id='useOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 14px';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
