@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.3';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.4';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4627,10 +4627,12 @@ function showMHP(){
     // 코엔자임Q10: 필요량=평균 식사분 + 90㎎(최적 보충). 식사분은 나이들수록↓. 유사나=코퀴논 90㎎
     var coqDiet=Math.max(5,Math.round(30-Math.max(0,age-30)*0.5)), coqT=coqDiet+90, coqU=exSet.coq10?90:0;
     mins.push({n:'코엔자임Q10',b:Math.round(zonePos(coqDiet,coqDiet,90)),a:Math.round(zonePos(coqDiet+coqU,coqDiet,90))});
-    var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:19px;margin:17px 0 7px;color:#2C3B33">'+title+'</div>';arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
+    var baGroup=function(title,arr,macro){var s='<div style="font-weight:800;font-size:19px;margin:17px 0 3px;color:#2C3B33">'+title+'</div>';
+      s+='<div style="position:relative;height:14px;margin:0 2px 4px"><span style="position:absolute;left:50%;transform:translateX(-50%);font-size:11.5px;font-weight:800;color:#9AA7B8;letter-spacing:.03em">RDA</span><span style="position:absolute;right:0;font-size:11.5px;font-weight:800;color:#17A6B8;letter-spacing:.03em">ODI</span></div>';   // 가운데=식사 권장량, 오른쪽 끝=최적
+      arr.forEach(function(x){s+=mhpBar3(x.n,x.b,x.a,macro);});return s;};
     /* --- 02 미량영양소 (섭취 전/후) --- */
     h+='<div class="sec"><h3><span class="n">02</span> 유사나 섭취 전 → 후 영양 충족도</h3>';
-    h+='<p class="leg" style="margin:0 0 7px">막대 색 = 충족도(<span style="color:#F0503F;font-weight:800">부족</span>→<span style="color:#17A6B8;font-weight:800">충분</span>) · 가운데 선 = 식사 권장량 · <span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:'+MHP_FILL+';vertical-align:-1px"></span> 유사나로 채워지는 양</p>';
+    // 범례 문구 제거 — 대신 그래프에 RDA(가운데)·ODI(오른쪽) 축 라벨 표시(baGroup 안)
     h+='<div class="segbtns"><button id="gbBefore" class="segbtn" onclick="mhpSetGraph(\'before\')">섭취 전</button><button id="gbAfter" class="segbtn on" onclick="mhpSetGraph(\'after\')">섭취 후</button></div>';
     h+=baGroup('미량영양소',vits.concat(mins),false);
     h+='</div>';
