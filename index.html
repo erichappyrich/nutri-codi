@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V4.4';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V4.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3500,7 +3500,11 @@ P({tier:'both',title:'',sub:'',render:()=>`
     · 수집 항목: 성명(또는 별칭)·성별·나이·키·체중·식사·생활습관·관심분야 (선택 입력 시 건강·질환·복용약 등 민감정보)<br>
     · 이용 목적: 개인 맞춤 영양 분석<br>
     · 제3자 제공: 회원님께 설문을 요청한 <b>영양 코디 의뢰인</b>에게 <b>분석 결과</b>를 전달 (목적: 맞춤 영양 코디)<br>
-    · 보관: 관련 법령·서비스 기준에 따라 보관 후 파기</div>`:''}<div style="text-align:center;font-size:11px;color:var(--muted);margin-top:18px;letter-spacing:.3px">버전 ${APPVER}</div>`,
+    · 보관: 관련 법령·서비스 기준에 따라 보관 후 파기</div>`:''}<div style="margin-top:20px;padding-top:15px;border-top:1px solid var(--line)">
+    <button class="navbtn" style="width:100%;background:#fff;color:#1E3A6B;border:1.5px solid #1E3A6B;box-shadow:none;font-weight:800" onclick="mhpUsagePickerOpen()">💊 유사나 영양제 섭취방법 안내서</button>
+    <p class="leg" style="text-align:center;margin-top:6px">설문 없이 제품만 골라 섭취 방법을 바로 만들어요</p>
+  </div>
+  <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:18px;letter-spacing:.3px">버전 ${APPVER}</div>`,
   valid:()=>S.consent.service});
 
 /* ===== 심플 3화면 (밀도형) ===== */
@@ -4436,33 +4440,81 @@ function mhpWishlist(){
  ov.onclick=function(e){if(e.target===ov)ov.remove();};
  document.body.appendChild(ov);
 }
-// ===== 제품별 섭취 방법 매핑 (사장님 안내 기준) =====
-// 1=기상후/식사직후 1포(유산균) · 2=식사전 물에 타서(식이섬유 가루) · 3=식사 대신 물300~350㎖(대체식) · 4=식사 중·직후 물과 함께(대부분 영양제, 마이헬스팩/헬스팩=아침1포·저녁1포) · 5=음료·제품별 안내
-function mhpUseMethod(n){
- if(/프로바이오틱/.test(n))return 1;
- if(/화이버지|FOS/.test(n))return 2;
- if(/뉴트리밀/.test(n))return 3;
- if(/피지|허브|미네랄 드링크|서큘레이트/.test(n))return 5;
- return 4;
-}
-function mhpUsageSpec(){
- var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
- var g={1:[],2:[],3:[],4:[],5:[]}; picks.forEach(function(n){g[mhpUseMethod(n)].push(n);});
- var secs=[];
- if(g[3].length)secs.push({ic:'🥤',h:'식사 대신 (대체식)',t:'하루 한 끼 대신, 낱개 1포(또는 3스푼)를 물 300~350㎖에 충분히 섞어 드세요. 섞은 뒤엔 가능한 빨리 드세요.',items:g[3]});
- if(g[2].length)secs.push({ic:'🍽️',h:'식사 전',t:'식사 30분 전~직전, 1스푼을 물에 타서(또는 음식에 뿌려) 드세요. 뉴트리밀과 함께 타 드셔도 좋아요. 섞은 뒤엔 가능한 빨리 드세요.',items:g[2]});
- if(g[4].length)secs.push({ic:'🌅',h:'아침·저녁 식사 중 또는 직후 (물과 함께)',t:'마이헬스팩·헬스팩은 아침 1포, 저녁 1포. 그 외 영양제도 식사 중·직후 물과 함께 드세요.',items:g[4]});
- if(g[1].length)secs.push({ic:'☀️',h:'아침 기상 후 또는 식사 직후',t:'물과 함께 1포 드세요.',items:g[1]});
- if(g[5].length)secs.push({ic:'🧃',h:'음료 · 기타',t:'제품에 안내된 방법대로 드세요.',items:g[5]});
+// ===== 제품별 섭취 방법 (USANA 제품 라벨 + 사장님 지침 기준) =====
+// 포 기반 마이헬스팩/헬스팩 = 아침 1포·저녁 1포(식사 직후)
+var MHP_SACHET=['마이헬스팩 (에너지 부스터)','마이헬스팩 (간 건강)','마이헬스팩 (눈 건강)','마이헬스팩 (혈압 건강)','헬스팩'];
+// 옵티마이저 팩 → 구성품으로 전개(각 구성품의 섭취법 적용). 포 형태가 아닌 개별 병 조합이라.
+var PACK_COMP={'베스트 옵티마이저 팩':['바이오메가','헤파실 플러스','코퀴논 30','프로후라바놀 C300'],
+ '면역 건강 팩':['알로엔즈 플러스','프로후라바놀 C300','프로글루카뮨','폴리C','부스터 C600'],
+ '체지방 클린 팩':['알로엔즈 플러스','헤파실 플러스','메타볼리즘 플러스'],
+ '뼈·관절 건강 팩':['바이오메가','프로코사 글루코사민','마그네칼 D','비타민D']};
+// 개별 제품: slots=[['시간대','수량'],…] / special=상황별. ※마이헬스팩 구성 알약은 마이헬스팩 기준(오전/오후) 준용, 코퀴논 별도구매=아침1·저녁1
+var USAGE={
+ '코퀴논 30':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '프로코사 글루코사민':{slots:[['아침 식사 직후','1정'],['점심 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '메타볼리즘 플러스':{slots:[['아침 식사 직후','1정'],['점심 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '유기농 곡물 효소':{slots:[['매 식사 직후','1포 (하루 1~3회, 직접 또는 물과 함께)']]},
+ '알로엔즈 플러스':{slots:[['아침 식사 직후','1~2정'],['점심 식사 직후','1~2정']]},
+ 'e프라임':{slots:[['아침 식사 직후','1캡슐'],['저녁 식사 직후','1캡슐']]},
+ '이소플라본 플러스':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '마그네칼 D':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '바이오메가':{slots:[['아침 식사 직후','2정'],['저녁 식사 직후','2정']]},
+ '프로후라바놀 C300':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '헤파실 플러스':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']]},
+ '비전엑스 디에스':{slots:[['아침 식사 직후','1정']]},
+ '부스터 C600':{slots:[['아침','1포 (그대로 또는 물에 타서)']],assume:true},
+ '폴리C':{slots:[['아침 식사 직후','1정'],['저녁 식사 직후','1정']],assume:true},
+ '비타민D':{slots:[['아침 식사 직후','1정']],assume:true},
+ '프로글루카뮨':{slots:[['아침 식사 직후','1정']],assume:true},
+ '뉴트리밀 액티브':{special:'meal'},
+ '프로바이오틱':{special:'wake'},
+ '화이버지 플러스':{special:'premeal'},
+ 'FOS 액티브':{special:'premeal'},
+ '코어 아미노 드링크':{special:'wkpre'},
+ '액티브 미네랄 드링크':{special:'wkpost'},
+ '피지 에너지 드링크':{special:'focus'},
+ '허브 티 믹스':{special:'tea'}
+};
+var USE_SECT=[
+ {k:'meal',ic:'🥤',h:'식사 대신 (대체식)',t:'하루 한 끼 대신, 낱개 1포(또는 3스푼)를 물 300~350㎖에 충분히 섞어 드세요. 섞은 뒤엔 가능한 빨리.'},
+ {k:'premeal',ic:'🍽️',h:'식사 30분 전 ~ 직전',t:'1스푼을 물에 타서(또는 음식에 뿌려) 드세요. 뉴트리밀과 함께 타 드셔도 좋아요. 섞은 뒤엔 가능한 빨리.'},
+ {k:'wake',ic:'☀️',h:'아침 기상 후 또는 식사 직후',t:'물과 함께 1포 드세요.'},
+ {k:'아침 식사 직후',ic:'🌅',h:'아침 식사 직후 (물과 함께)',t:''},
+ {k:'아침',ic:'🌅',h:'아침',t:''},
+ {k:'점심 식사 직후',ic:'🌞',h:'점심 식사 직후 (물과 함께)',t:''},
+ {k:'저녁 식사 직후',ic:'🌙',h:'저녁 식사 직후 (물과 함께)',t:''},
+ {k:'매 식사 직후',ic:'🍚',h:'매 식사 직후',t:''},
+ {k:'wkpre',ic:'🏃',h:'운동 30분 전 ~ 운동 중',t:'1스푼(9g)을 물이나 음료 240㎖에 잘 섞어 드세요.'},
+ {k:'wkpost',ic:'💧',h:'운동 중 또는 운동 후',t:'1포를 물 350㎖에 잘 섞어 드세요.'},
+ {k:'focus',ic:'🎯',h:'집중이 필요할 때',t:'1포를 시원한 물 240㎖에 잘 섞어 드세요.'},
+ {k:'tea',ic:'☕',h:'식후 (티)',t:'1포를 물 240㎖에 넣어 드세요.'}
+];
+function mhpUsageSpec(pickList){
+ var picks=pickList||Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
+ var prods=[]; picks.forEach(function(n){
+  if(MHP_SACHET.indexOf(n)>=0)prods.push({sachet:true,n:n});
+  else if(PACK_COMP[n])PACK_COMP[n].forEach(function(c){prods.push({n:c});});
+  else prods.push({n:n});
+ });
+ var slot={}; function add(k,p,amt){ if(!slot[k])slot[k]=[]; if(!slot[k].some(function(x){return x.p===p;}))slot[k].push({p:p,amt:amt}); }
+ var sachetSeen={};
+ prods.forEach(function(x){
+  if(x.sachet){ if(sachetSeen[x.n])return; sachetSeen[x.n]=1; add('아침 식사 직후',x.n,'1포'); add('저녁 식사 직후',x.n,'1포'); return; }
+  var u=USAGE[x.n]; if(!u){ add('아침 식사 직후',x.n,'1정'); return; }
+  if(u.special){ add(u.special,x.n,''); return; }
+  u.slots.forEach(function(s){ add(s[0],x.n,s[1]); });
+ });
+ var secs=[]; USE_SECT.forEach(function(sec){ var arr=slot[sec.k]; if(arr&&arr.length)secs.push({ic:sec.ic,h:sec.h,t:sec.t,items:arr}); });
  return secs;
 }
-// 섭취 방법 안내 오버레이
-function mhpUsage(){
- var secs=mhpUsageSpec();
- if(!secs.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
+// 섭취 방법 안내 오버레이 (pickList 없으면 결과의 체크 제품 사용)
+function mhpUsage(pickList){
+ window._usagePicks=pickList||null;
+ var secs=mhpUsageSpec(pickList);
+ if(!secs.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;}
  var body=secs.map(function(s){
-  var items=s.items.map(function(n){var img=prodImg(n);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+n+'</span></div>';}).join('');
-  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div><div class="leg" style="margin:4px 0 2px">'+s.t+'</div>'+items+'</div>';
+  var items=s.items.map(function(it){var img=prodImg(it.p);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+it.p+(it.amt?' <span style="color:var(--muted);font-weight:600">· '+it.amt+'</span>':'')+'</span></div>';}).join('');
+  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div>'+(s.t?'<div class="leg" style="margin:4px 0 2px">'+s.t+'</div>':'')+items+'</div>';
  }).join('');
  var ov=document.createElement('div'); ov.id='useOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 14px';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
@@ -4487,7 +4539,7 @@ function mhpBuildCanvas(spec,imgs){
  (spec.blocks||[]).forEach(function(bl){
   if(bl.header){ plan.push({t:'h',txt:(bl.ic?bl.ic+' ':'')+bl.header,y:y}); y+=44; }
   if(bl.note){ wrap(bl.note,W-PAD*2,'24px '+FF).forEach(function(l){plan.push({t:'note',txt:l,y:y}); y+=31;}); y+=6; }
-  (bl.items||[]).forEach(function(it){ plan.push({t:'item',name:it.name,img:imgs[it.name],y:y}); y+=62; });
+  (bl.items||[]).forEach(function(it){ plan.push({t:'item',name:it.name,img:imgs[it.p||it.name],y:y}); y+=62; });
   y+=14;
  });
  var totalH=y+56; cv.height=totalH; ctx=cv.getContext('2d');
@@ -4526,13 +4578,37 @@ function mhpGenShare(spec,names,fn,title){ var go=function(){ mhpLoadImgs(names)
 function mhpShareWish(){
  var picks=Object.keys(S.mhpPick||{}).filter(function(n){return S.mhpPick[n];});
  if(!picks.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
- mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
+ mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 희망서',blocks:[{items:picks.map(function(n){return {name:n,p:n};})}],footer:'총 '+picks.length+'개 · 맞춤영양 코디'},picks,'섭취희망서.png','제품 섭취 희망서');
 }
 function mhpShareUsage(){
- var secs=mhpUsageSpec(); if(!secs.length){alert('드실 제품을 하나 이상 체크해 주세요.');return;}
- var names=[]; var blocks=secs.map(function(s){ s.items.forEach(function(n){names.push(n);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(n){return {name:n};})}; });
+ var secs=mhpUsageSpec(window._usagePicks); if(!secs.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;}
+ var names=[]; var blocks=secs.map(function(s){ s.items.forEach(function(it){names.push(it.p);}); return {ic:s.ic,header:s.h,note:s.t,items:s.items.map(function(it){return {name:it.p+(it.amt?' · '+it.amt:''),p:it.p};})}; });
  mhpGenShare({subtitle:'USANA · 맞춤영양 코디',title:'제품 섭취 방법 안내',blocks:blocks,footer:'맞춤영양 코디 · 자세한 사항은 제품 라벨을 확인하세요'},names,'섭취방법안내.png','제품 섭취 방법 안내');
 }
+// ===== 시작 화면 창구: 설문 없이 제품만 골라 섭취방법 안내서 만들기 =====
+var PICK_GROUPS=[
+ {h:'마이헬스팩 · 헬스팩',items:['헬스팩','마이헬스팩 (에너지 부스터)','마이헬스팩 (간 건강)','마이헬스팩 (눈 건강)','마이헬스팩 (혈압 건강)','베스트 옵티마이저 팩','면역 건강 팩','체지방 클린 팩','뼈·관절 건강 팩']},
+ {h:'대체식 · 드링크 · 가루',items:['뉴트리밀 액티브','화이버지 플러스','FOS 액티브','유기농 곡물 효소','프로바이오틱','코어 아미노 드링크','피지 에너지 드링크','액티브 미네랄 드링크','허브 티 믹스']},
+ {h:'개별 영양제',items:['바이오메가','코퀴논 30','마그네칼 D','비타민D','폴리C','부스터 C600','프로후라바놀 C300','헤파실 플러스','비전엑스 디에스','프로코사 글루코사민','프로글루카뮨','e프라임','이소플라본 플러스','메타볼리즘 플러스','알로엔즈 플러스']}
+];
+function mhpPickTog(n,btn){ if(!window._pickerSel)window._pickerSel={}; window._pickerSel[n]=!window._pickerSel[n]; var on=window._pickerSel[n]; btn.style.borderColor=on?'#17A6B8':'#e5e9ef'; btn.style.background=on?'#E3F4F6':'#fff'; btn.style.color=on?'#13889A':'#334155'; }
+function mhpUsagePickerOpen(){
+ window._pickerSel={};
+ var body=PICK_GROUPS.map(function(g){
+  var chips=g.items.map(function(n){var img=prodImg(n);return '<button onclick="mhpPickTog(this.dataset.n,this)" data-n="'+n.replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1.5px solid #e5e9ef;border-radius:12px;background:#fff;color:#334155;font-size:13.5px;font-weight:700;cursor:pointer">'+(img?'<img src="'+img+'" style="width:26px;height:26px;object-fit:cover;border-radius:6px">':'')+n+'</button>';}).join('');
+  return '<div style="margin-top:13px"><div style="font-weight:800;font-size:14px;color:var(--teal-d);margin-bottom:7px">'+g.h+'</div><div style="display:flex;flex-wrap:wrap;gap:7px">'+chips+'</div></div>';
+ }).join('');
+ var ov=document.createElement('div'); ov.id='pickOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px 12px';
+ ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:470px;width:100%;padding:20px 18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
+  +'<div style="text-align:center"><div style="font-size:12px;font-weight:800;color:var(--teal-d);letter-spacing:.04em">USANA · 맞춤영양 코디</div><div style="font-size:20px;font-weight:900;margin-top:3px">섭취 방법 안내서 만들기</div><div class="leg" style="margin-top:4px">드실 제품을 모두 선택하세요</div></div>'
+  +body
+  +'<button class="navbtn" style="width:100%;margin-top:17px;background:#17A6B8;color:#fff" onclick="mhpPickDone()">📋 섭취 방법 안내서 보기</button>'
+  +'<button class="navbtn" style="width:100%;margin-top:9px;background:#fff;color:#64748B;border:1.5px solid #e5e9ef;box-shadow:none" onclick="var o=document.getElementById(\'pickOv\');if(o)o.remove()">닫기</button>'
+  +'</div>';
+ ov.onclick=function(e){if(e.target===ov)ov.remove();};
+ document.body.appendChild(ov);
+}
+function mhpPickDone(){ var sel=Object.keys(window._pickerSel||{}).filter(function(n){return window._pickerSel[n];}); if(!sel.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;} var o=document.getElementById('pickOv'); if(o)o.remove(); mhpUsage(sel); }
 // 생활습관 개선 조언 (예전 리포트의 '먼저 이것부터' + '관심분야 케어' 복원)
 var LSX={
  constipation:{why:'변비는 식이섬유·수분 부족, 운동 부족, 불규칙한 식사·스트레스가 겹쳐 장운동이 느려질 때 잘 생겨요.',exercise:'아침 공복에 물 한 잔 + 가벼운 걷기·복부 스트레칭이 장운동을 깨워줘요.',lifestyle:'식이섬유(채소·통곡물·과일)와 물을 충분히, 유산균·발효식품을 꾸준히. 변의가 오면 참지 말고, 아침 식사로 장 반사를 규칙적으로 만드세요.'},
