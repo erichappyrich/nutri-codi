@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4565,6 +4565,7 @@ function mhpImgFallback(cv,fn){
   var ua=navigator.userAgent||''; var isKakao=/KAKAOTALK/i.test(ua);
   var _ver=(/[?&]v=([^&]*)/.exec(location.search)||[])[1]||'';
   var _bu=(window._shPicks&&window._shPicks.length)?('app.html?'+(_ver?'v='+encodeURIComponent(_ver)+'&':'')+(window._shKind==='wish'?'wish':'img')+'='+encodeURIComponent(window._shPicks.join('|'))):'';
+  var _abs=_bu?(location.origin+location.pathname.replace(/[^/]*$/,'')+_bu):''; window._shExtUrl=_abs;
   var diag='share:'+(navigator.share?'Y':'N')+' · canShare:'+(navigator.canShare?'Y':'N')+' · file:'+(window._shF?'Y':'N')+' · '+(isKakao?'KAKAO':(/Instagram|FBAN|FBAV|NAVER|Line/i.test(ua)?'인앱':(/CriOS|Chrome/i.test(ua)?'크롬':(/Safari/i.test(ua)?'사파리':'기타'))));
   var tip=isKakao
    ? '<b style="color:#FFD84D">카톡 안에서는 저장이 막혀 있어요.</b><br><span style="font-weight:600;font-size:13.5px;color:#eef2f8">우측 상단 <b>⋮</b> → <b>\'다른 브라우저로 열기\'</b> 후 다시 하면 공유가 됩니다.</span>'
@@ -4572,7 +4573,7 @@ function mhpImgFallback(cv,fn){
   var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.9);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
   ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15px;text-align:center;margin-bottom:11px;max-width:420px;line-height:1.55">'+tip+'</div>'
    +'<img src="'+durl+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
-   +(_bu?'<a href="'+_bu+'" target="_blank" rel="noopener" class="navbtn" style="flex:none;display:block;max-width:420px;width:100%;margin-top:14px;padding:14px 0;text-align:center;text-decoration:none;background:#2ACB93;color:#fff">🌐 브라우저에서 이미지 열기 (저장·복사)</a>':'')
+   +(_abs?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#2ACB93;color:#fff" onclick="mhpOpenExternal()">📱 기본 브라우저로 열기 (저장·복사)</button>':'')
    +((navigator.clipboard&&window.ClipboardItem)?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#1E3A6B;color:#fff" onclick="mhpCopyImg()">📋 이미지 복사 → 카톡에 붙여넣기</button>':'')
    +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#17A6B8;color:#fff" onclick="if(window._mhpBurl)location.href=window._mhpBurl">🖼️ 전체화면으로 보기(스크린샷)</button>'
    +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>'
@@ -4591,6 +4592,16 @@ function mhpCopyImg(){
     .catch(function(){ alert('이 앱에서는 복사가 막혀 있어요.\n아래 \'전체화면으로 보기\' 후 길게 눌러 저장하거나 스크린샷 해주세요.'); });
   }else{ alert('이 앱에서는 복사를 지원하지 않아요.\n\'전체화면으로 보기\' 후 스크린샷 해주세요.'); }
  }catch(e){ alert('복사 실패 — \'전체화면으로 보기\'를 이용해 주세요.'); }
+}
+// OS에 '기본 브라우저로 열기' 강제 신호 (앱 웹뷰 탈출 시도). iOS=x-safari / Android=intent
+function mhpOpenExternal(){
+ var url=window._shExtUrl; if(!url){ if(window._mhpBurl)location.href=window._mhpBurl; return; }
+ var ua=navigator.userAgent||'';
+ try{
+  if(/iPhone|iPad|iPod/i.test(ua)){ location.href='x-safari-'+url; }
+  else if(/Android/i.test(ua)){ location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end'; }
+  else { var w=window.open(url,'_blank'); if(!w)location.href=url; }
+ }catch(e){ try{ var w2=window.open(url,'_blank'); if(!w2)location.href=url; }catch(e2){ location.href=url; } }
 }
 // 안내서 열 때 호출 — 공유 이미지를 미리 준비(클릭 시 mhpDoShare가 즉시 공유)
 function mhpShareWish(){
