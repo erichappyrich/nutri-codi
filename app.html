@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V5.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4573,7 +4573,7 @@ function mhpImgFallback(cv,fn){
   var ov=document.createElement('div'); ov.id='imgOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(10,16,28,.9);z-index:10001;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:auto;padding:18px 14px';
   ov.innerHTML='<div style="color:#fff;font-weight:700;font-size:15px;text-align:center;margin-bottom:11px;max-width:420px;line-height:1.55">'+tip+'</div>'
    +'<img src="'+durl+'" style="flex:none;width:100%;max-width:420px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.4)">'
-   +(_abs?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#2ACB93;color:#fff" onclick="mhpOpenExternal()">📱 기본 브라우저로 열기 (저장·복사)</button>':'')
+   +(_abs?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:14px;padding:14px 0;background:#2ACB93;color:#fff" onclick="mhpOpenExternal()">🌐 크롬 앱으로 열기 (저장·복사)</button>':'')
    +((navigator.clipboard&&window.ClipboardItem)?'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#1E3A6B;color:#fff" onclick="mhpCopyImg()">📋 이미지 복사 → 카톡에 붙여넣기</button>':'')
    +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0;background:#17A6B8;color:#fff" onclick="if(window._mhpBurl)location.href=window._mhpBurl">🖼️ 전체화면으로 보기(스크린샷)</button>'
    +'<button class="navbtn" style="flex:none;max-width:420px;width:100%;margin-top:10px;padding:14px 0" onclick="var o=document.getElementById(\'imgOv\');if(o)o.remove()">닫기</button>'
@@ -4593,15 +4593,18 @@ function mhpCopyImg(){
   }else{ alert('이 앱에서는 복사를 지원하지 않아요.\n\'전체화면으로 보기\' 후 스크린샷 해주세요.'); }
  }catch(e){ alert('복사 실패 — \'전체화면으로 보기\'를 이용해 주세요.'); }
 }
-// OS에 '기본 브라우저로 열기' 강제 신호 (앱 웹뷰 탈출 시도). iOS=x-safari / Android=intent
+// 크롬 앱으로 핸드오버 (앱 웹뷰 탈출). iOS=googlechromes:// / Android=intent(package=com.android.chrome). 크롬 없으면 사파리/폴백
 function mhpOpenExternal(){
  var url=window._shExtUrl; if(!url){ if(window._mhpBurl)location.href=window._mhpBurl; return; }
- var ua=navigator.userAgent||'';
+ var ua=navigator.userAgent||''; var t0=Date.now();
  try{
-  if(/iPhone|iPad|iPod/i.test(ua)){ location.href='x-safari-'+url; }
-  else if(/Android/i.test(ua)){ location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end'; }
-  else { var w=window.open(url,'_blank'); if(!w)location.href=url; }
- }catch(e){ try{ var w2=window.open(url,'_blank'); if(!w2)location.href=url; }catch(e2){ location.href=url; } }
+  if(/iPhone|iPad|iPod/i.test(ua)){
+   location.href=url.replace(/^https:\/\//i,'googlechromes://').replace(/^http:\/\//i,'googlechrome://');   // 크롬 iOS 앱
+   setTimeout(function(){ if(!document.hidden && Date.now()-t0<2500){ location.href='x-safari-'+url; } },1300); // 크롬 없으면 사파리
+  } else if(/Android/i.test(ua)){
+   location.href='intent://'+url.replace(/^https?:\/\//i,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end';   // 크롬 안드로이드 앱
+  } else { var w=window.open(url,'_blank'); if(!w)location.href=url; }
+ }catch(e){ try{ location.href=url; }catch(e2){} }
 }
 // 안내서 열 때 호출 — 공유 이미지를 미리 준비(클릭 시 mhpDoShare가 즉시 공유)
 function mhpShareWish(){
