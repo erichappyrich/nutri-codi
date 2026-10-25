@@ -3491,7 +3491,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V7.1';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V7.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4740,9 +4740,9 @@ function showMHP(){
     var p100=function(val,tgt){return Math.max(0,Math.round((val/tgt)*100));};
     // 대량영양소 적정(100%) = 최소권장이 아닌 '최적량' 기준: 단백질 1.2g/kg(최적, 최소0.8 아님·근육유지), 탄수 열량의 50%(최적 200~350g 활동량비례), 지방 열량의 30%(최적 20~35%), 식이섬유 14g/1,000kcal
     var protT=wkg*1.2, carbT=tdee*0.50/4, fatT=tdee*0.30/9, fibT=tdee*14/1000;
-    var carbTd=carbT/2, fatTd=fatT/2, fibTd=fibT*1.5;   // ★섹션03 표시 기준 재조정(사용자 지침 2026-10-25): 탄수·지방 ÷2 → 뉴트리밀 ~70%·일반식사는 기준 훨씬 초과 / 식이섬유 ×1.5 → 뉴트리밀 ~105%
+    var carbTd=carbT/2, fatTd=fatT/2, fibTd=fibT*1.2;   // ★섹션03 표시 기준(사용자 지침): 탄수·지방 ÷2 / 식이섬유 ×1.2(기존 ×1.5에서 20% 하향 2026-10-25)
     var Pg=(M?M.prot:0)*FOODREAL, Cg=M?M.carb:0, Fg=M?M.fat:0, FBg=M?M.fiber:0;  // 단백질은 식품 현실 보정(평균 품질 음식=영양DB의 85%). 탄수·지방은 과잉섭취쪽이라 보정 안 함
-    var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(300,p100(Cg,carbTd)), mFat=Math.min(300,p100(Fg,fatTd)), mFib=Math.min(200,p100(FBg,fibTd));
+    var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(300,p100(Cg*0.55,carbTd)), mFat=Math.min(300,p100(Fg*0.55,fatTd)), mFib=Math.min(200,p100(FBg,fibTd));   // 일반식단 탄수·지방 섭취량 55% 수준으로 측정(사용자 지침 2026-10-25)
     // ★뉴트리밀 섭취 시 = 하루 세 끼를 모두 뉴트리밀로 먹었을 때(식사 제외, 뉴트리밀 3회분이 그날 전부 — 사용자 지침 2026-10-25). 1회분=단24·탄24·지6·섬12g → 3회분=단72·탄72·지18·섬36g. 하루 적정 대비 %.
     var NM={p:24,c:24,f:6,fib:12};
     var nProt=Math.min(200,p100(NM.p*3,protT)), nCarb=Math.min(300,p100(NM.c*3,carbTd)), nFat=Math.min(300,p100(NM.f*3,fatTd)), nFib=Math.min(200,p100(NM.fib*3,fibTd));
