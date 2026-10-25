@@ -226,6 +226,7 @@ select.big{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xm
 .sec h3{font-size:15px;margin:0 0 5px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
 .sec h3 .n{font-family:var(--mono);font-size:11px;color:var(--teal);border:1px solid var(--teal);border-radius:5px;padding:1px 5px}
 .leg{font-size:13.5px;color:var(--muted);margin:0 0 11px}
+.rkdesc{font-size:15px;color:var(--muted);line-height:1.45;margin-top:2px}
 .pillar{display:grid;grid-template-columns:54px 1fr 42px;align-items:center;gap:10px;margin-bottom:9px}
 .pillar .pn{font-size:13px;font-weight:700}
 .bar{height:11px;background:#EDF0ED;border-radius:6px;overflow:hidden;display:flex}
@@ -3489,7 +3490,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V6.6';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V6.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4416,7 +4417,7 @@ function mhpRankRow(rank,name,price,line1,line2,noTop){
  return '<div style="display:flex;gap:12px;align-items:center;padding:11px 0;'+((rank>1&&!noTop)?'border-top:1px solid var(--line,#eef2f0)':'')+'">'
   +badge
   +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:20px">'+name+(price?' <span style="font-size:14px;font-weight:600;color:var(--muted)">'+price+'</span>':'')+'</div>'
-  +'<div class="leg" style="margin-top:2px">'+line1+'</div>'+(line2?'<div style="font-size:14.5px;color:var(--muted);margin-top:3px">구성: '+line2+'</div>':'')+'</div>'
+  +'<div class="rkdesc">'+line1+'</div>'+(line2?'<div class="rkdesc" style="margin-top:3px">구성: '+line2+'</div>':'')+'</div>'
   +'<button class="pickbtn'+(checked?' on':'')+'" onclick="mhpTogPick(this.dataset.n,this)" data-n="'+name.replace(/"/g,'&quot;')+'"><svg viewBox="0 0 24 24" width="21" height="21"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
   +'</div>';
 }
@@ -4510,8 +4511,8 @@ function mhpUsage(pickList){
  var secs=mhpUsageSpec(pickList);
  if(!secs.length){alert('드실 제품을 하나 이상 선택해 주세요.');return;}
  var body=secs.map(function(s){
-  var items=s.items.map(function(it){var img=prodImg(it.p);return '<div style="display:flex;gap:9px;align-items:center;margin-top:6px">'+(img?'<img src="'+img+'" style="width:34px;height:34px;object-fit:cover;border-radius:8px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:15px">'+it.p+(it.amt?' <span style="color:var(--muted);font-weight:600;font-size:13.5px">· '+it.amt+'</span>':'')+'</span></div>';}).join('');
-  return '<div style="border-top:1px solid #eef2f0;padding:12px 0"><div style="font-weight:800;font-size:16.5px">'+s.ic+' '+s.h+'</div>'+(s.t?'<div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin:5px 0 3px">'+s.t+'</div>':'')+items+'</div>';
+  var items=s.items.map(function(it){var img=prodImg(it.p);return '<div style="display:flex;gap:11px;align-items:center;margin-top:9px">'+(img?'<img src="'+img+'" style="width:46px;height:46px;object-fit:cover;border-radius:10px;border:1px solid var(--line)">':'')+'<span style="font-weight:700;font-size:18px">'+it.p+(it.amt?' <span style="color:var(--muted);font-weight:600;font-size:15px">· '+it.amt+'</span>':'')+'</span></div>';}).join('');
+  return '<div style="border-top:1px solid #eef2f0;padding:14px 0"><div style="font-weight:800;font-size:19px">'+s.ic+' '+s.h+'</div>'+(s.t?'<div style="font-size:15px;color:var(--muted);line-height:1.6;margin:6px 0 3px">'+s.t+'</div>':'')+items+'</div>';
  }).join('');
  var ov=document.createElement('div'); ov.id='useOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:24px 14px';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:440px;width:100%;padding:22px 20px 18px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
@@ -4642,8 +4643,8 @@ function mhpPickTog(n,btn){ if(!window._pickerSel)window._pickerSel={}; window._
 function mhpUsagePickerOpen(){
  window._pickerSel={};
  var body=PICK_GROUPS.map(function(g){
-  var chips=g.items.map(function(n){var img=prodImg(n);return '<button onclick="mhpPickTog(this.dataset.n,this)" data-n="'+n.replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border:1.5px solid #e5e9ef;border-radius:12px;background:#fff;color:#334155;font-size:13.5px;font-weight:700;cursor:pointer">'+(img?'<img src="'+img+'" style="width:26px;height:26px;object-fit:cover;border-radius:6px">':'')+n+'</button>';}).join('');
-  return '<div style="margin-top:13px"><div style="font-weight:800;font-size:14px;color:var(--teal-d);margin-bottom:7px">'+g.h+'</div><div style="display:flex;flex-wrap:wrap;gap:7px">'+chips+'</div></div>';
+  var chips=g.items.map(function(n){var img=prodImg(n);return '<button onclick="mhpPickTog(this.dataset.n,this)" data-n="'+n.replace(/"/g,'&quot;')+'" style="display:inline-flex;align-items:center;gap:9px;padding:11px 14px;border:1.5px solid #e5e9ef;border-radius:13px;background:#fff;color:#334155;font-size:16px;font-weight:700;cursor:pointer">'+(img?'<img src="'+img+'" style="width:38px;height:38px;object-fit:cover;border-radius:8px">':'')+n+'</button>';}).join('');
+  return '<div style="margin-top:15px"><div style="font-weight:800;font-size:16px;color:var(--teal-d);margin-bottom:9px">'+g.h+'</div><div style="display:flex;flex-wrap:wrap;gap:9px">'+chips+'</div></div>';
  }).join('');
  var ov=document.createElement('div'); ov.id='pickOv'; ov.style.cssText='position:fixed;inset:0;background:rgba(20,30,50,.55);z-index:10000;display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:20px 12px';
  ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:470px;width:100%;padding:20px 18px 16px;box-shadow:0 10px 40px rgba(0,0,0,.3)">'
