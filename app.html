@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V6.2';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V6.3';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -3489,15 +3489,12 @@ P({tier:'both',title:'',sub:'',render:()=>`
     <svg class="hbrand-wave" viewBox="0 0 400 40" preserveAspectRatio="none"><path d="M0,24 C70,6 130,6 200,20 C270,34 330,34 400,16 L400,40 L0,40 Z" fill="var(--bg)"/></svg>
   </div>
   <p class="herotag">몇 가지만 골라주시면 영양 상태를 정리해 드려요.<br>약 5분이면 끝나요.</p>
-  <div style="background:#F4F8F6;border-radius:12px;padding:13px 15px;margin-top:4px"><p class="reassure" style="margin:0">🔒 입력하신 내용은 <b>이 기기에서 분석에만</b> 쓰이고 어디에도 <b>저장·전송되지 않아요.</b></p></div>
   <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:20px;letter-spacing:.3px">버전 ${APPVER}</div>`,
   valid:()=>true});
 
 /* ===== 심플 3화면 (밀도형) ===== */
 function sq(key,label,opts,ic){return `<div class="sqbox"><div class="sqlbl">${ic?`<span class="sqic">${ic}</span>`:''}<span>${label}</span></div><div class="sqopts">`+opts.map(o=>`<button class="sqbtn ${S.simple[key]===o[0]?'on':''}" onclick="S.simple['${key}']='${o[0]}';upd()">${o[1]}</button>`).join('')+`</div></div>`;}
 P({tier:'simple',gate:true,title:'기본정보',sub:'기본 정보를 알려주세요.',render:()=>`
-  <div class="lbl">성명 또는 별칭</div>
-  <input type="text" placeholder="이름 또는 별칭을 입력하세요" value="${(S.name||'').replace(/"/g,'&quot;')}" oninput="S.name=this.value;$('next').disabled=!curStep().valid()" style="width:100%;box-sizing:border-box;padding:13px 14px;font-size:16px;border:1.5px solid var(--line,#dde3e8);border-radius:12px;background:var(--surface,#fff);margin-bottom:2px">
   <div class="lbl">태어난 해</div>
   <select class="big" onchange="S.birthYear=+this.value;upd()">${yearOpts()}</select>
   <div class="opts pair" style="margin-top:6px">${optBtn(true,'생일 지났어요',uic('cake'),'birthdayPassed')}${optBtn(false,'아직 안 지났어요',uic('cal'),'birthdayPassed')}</div>
@@ -3506,7 +3503,7 @@ P({tier:'simple',gate:true,title:'기본정보',sub:'기본 정보를 알려주�
   ${stepper('키','height','cm',1)}${stepper('몸무게','weight','kg',1)}
   <div class="lbl">복부 형태</div><div class="bodygrid">${[[0,'탄탄한 편'],[1,'아랫배가 살짝 나온 편'],[2,'볼록한 편'],[3,'배가 많이 나옴']].map(a=>`<button class="optv ${S.abdomen===a[0]?'on':''}" onclick="S.abdomen=${a[0]};upd()">${uic('ab'+a[0]+'_'+(S.sex==='f'?'f':'m'))}<span class="vlbl">${a[1]}</span></button>`).join('')}</div>
   <div class="lbl" style="margin-top:28px">허벅지 두께</div><div class="bodygrid">${[['thin','얇은 편'],['normal','보통'],['thick','두꺼운 편']].map(a=>`<button class="optv ${S.thigh===a[0]?'on':''}" onclick="S.thigh='${a[0]}';upd()">${uic('thigh_'+a[0]+'_'+(S.sex==='f'?'f':'m'))}<span class="vlbl">${a[1]}</span></button>`).join('')}</div>`,
-  valid:()=>!!(S.name&&S.name.trim())&&!!S.sex&&S.height>0&&S.weight>0&&S.abdomen!=null&&!!S.thigh});
+  valid:()=>!!S.sex&&S.height>0&&S.weight>0&&S.abdomen!=null&&!!S.thigh});
 
 P({tier:'simple',show:()=>false,gate:true,title:'식습관',sub:'평소에 가장 가까운 것을 골라주세요.',render:()=>
   sq('dietType','평소 식사는 주로?',[['home','집밥·자연식 위주'],['mixed','반반'],['out','외식·배달·가공식품 위주']],'🍽️')
