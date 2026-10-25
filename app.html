@@ -3476,7 +3476,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V5.9';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V6.0';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4602,7 +4602,9 @@ function mhpOpenExternal(){
    location.href=url.replace(/^https:\/\//i,'googlechromes://').replace(/^http:\/\//i,'googlechrome://');   // 크롬 iOS 앱
    setTimeout(function(){ if(!document.hidden && Date.now()-t0<2500){ location.href='x-safari-'+url; } },1300); // 크롬 없으면 사파리
   } else if(/Android/i.test(ua)){
-   location.href='intent://'+url.replace(/^https?:\/\//i,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end';   // 크롬 안드로이드 앱
+   // 브라우저 지정 없이(기본 브라우저/선택창) 안드로이드 인텐트로 열기 — 특정 패키지 강제보다 성공률↑
+   location.href='intent://'+url.replace(/^https?:\/\//i,'')+'#Intent;scheme=https;S.browser_fallback_url='+encodeURIComponent(url)+';end';
+   setTimeout(function(){ if(!document.hidden && Date.now()-t0<2500){ location.href='intent://'+url.replace(/^https?:\/\//i,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(url)+';end'; } },1200);   // 안 열리면 크롬 지정으로 재시도
   } else { var w=window.open(url,'_blank'); if(!w)location.href=url; }
  }catch(e){ try{ location.href=url; }catch(e2){} }
 }
