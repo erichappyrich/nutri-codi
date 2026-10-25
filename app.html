@@ -3490,7 +3490,7 @@ const S={consent:{service:false,statistics:false,sensitive:false},showTerms:fals
 
 const MEALNAME=['아침','점심','저녁','야식'];
 const $=id=>document.getElementById(id);
-const APPVER='V6.7';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
+const APPVER='V6.8';   // 빌드 시 실제 버전으로 치환(현재 보는 파일이 최신인지 확인용)
 let step=0;
 const STEPS=[]; function P(o){STEPS.push(o);}
 
@@ -4741,8 +4741,8 @@ function showMHP(){
     var protT=wkg*1.2, carbT=tdee*0.50/4, fatT=tdee*0.30/9, fibT=tdee*14/1000;
     var Pg=(M?M.prot:0)*FOODREAL, Cg=M?M.carb:0, Fg=M?M.fat:0, FBg=M?M.fiber:0;  // 단백질은 식품 현실 보정(평균 품질 음식=영양DB의 85%). 탄수·지방은 과잉섭취쪽이라 보정 안 함
     var mProt=Math.min(200,p100(Pg,protT)), mCarb=Math.min(200,p100(Cg,carbT)), mFat=Math.min(200,p100(Fg,fatT)), mFib=Math.min(200,p100(FBg,fibT));
-    // ★뉴트리밀 대체 모델(최종): 하루 끼니 중 '한 끼(1/meals)'를 뉴트리밀로 통째 교체. 뉴트리밀 1회분 = 단백질24·탄수24·지방6·식이섬유12g. new = 식사×(1-1/meals) + 뉴트리밀. (더 이상 변경 금지 — 가장 단순·정직한 모델)
-    var NM={p:24,c:24,f:6,fib:12}, km=(1-1/meals);
+    // ★뉴트리밀 대체 모델: 하루 3끼 중 '한 끼(1/3)'를 뉴트리밀로 통째 교체(끼니수 입력과 무관하게 3끼 고정 — 사용자 지침 2026-10-25). 뉴트리밀 1회분 = 단백질24·탄수24·지방6·식이섬유12g. new = 식사×(2/3) + 뉴트리밀.
+    var NM={p:24,c:24,f:6,fib:12}, km=(1-1/3);
     var nProt=Math.min(200,p100(Pg*km+NM.p,protT)), nCarb=Math.min(200,p100(Cg*km+NM.c,carbT)), nFat=Math.min(200,p100(Fg*km+NM.f,fatT)), nFib=Math.min(200,p100(FBg*km+NM.fib,fibT));
     var fishSig=0; try{(S.basket||[]).concat(S.nightBasket||[]).forEach(function(nm){if(/생선|고등어|연어|참치|회|조림|멸치|꽁치|삼치/.test(nm))fishSig++;});}catch(e){}
     // 오메가3(EPA+DHA): 필요량=뉴트리서치 1,141㎎. 식사=생선 기반, 유사나=바이오메가 ~1,050㎎
